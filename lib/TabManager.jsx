@@ -393,14 +393,22 @@ class TabManager extends React.Component {
 					/>
 				</div>
 				<div className="window top" ref="tophover">
-					<div className="icon windowaction donate" title="Donate a Coffee" onClick={this.donate} onMouseEnter={this.hoverIcon} />
+					{/* <div 
+						className="icon windowaction donate" 
+						title="Donate a Coffee"
+						onClick={this.donate} 
+					 	onMouseEnter={this.hoverIcon} />
 					<div
 						className="icon windowaction rate"
 						title="Rate Tab Manager Plus"
 						onClick={this.rateExtension}
 						onMouseEnter={this.hoverIcon}
-					/>
-					<div className="icon windowaction options" title="Options" onClick={this.toggleOptions} onMouseEnter={this.hoverIcon} />
+					/> */}
+					<div 
+						className="icon windowaction options" 
+						title="Options" 
+						onClick={this.toggleOptions} 
+						onMouseEnter={this.hoverIcon} />
 					<input
 						type="text"
 						disabled={true}
