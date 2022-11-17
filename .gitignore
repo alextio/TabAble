@@ -9,4 +9,4 @@ package-lock.json
 build/
 source/
 tab-manager*/
-outlib
+outlib/
