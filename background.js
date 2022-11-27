@@ -1,4 +1,5 @@
 "use strict";
+importScripts('vendor/localforage.min.js');
 
 // TODO: Migrate background.js to service worker and upgrade to Manifest V3. 
 // When migrating to this new background context, you'll need to keep two main things in mind. 
@@ -17,12 +18,18 @@ var browser = browser || chrome;
 
 function setup(){
 	console.log(self);
-	setupPopup();
 	setupListeners(); 
+	setupStorage();
+	setupPopup();
 	updateTabCountDebounce();
 
 	// setTimeout(cleanUp, 5000);
 	console.log("setup completed");
+}
+
+function setupStorage(){
+	// this requires the JS library localForage
+	console.log(localforage);
 }
 
 function setupListeners(){
@@ -257,20 +264,9 @@ async function openAsOwnTab() {
 	return browser.tabs.create({ url: "popup.html" });
 }
 
-async function setupPopup({openInOwnTab: ownTab = undefined} = {}) {
-	// const storage = await browser.storage.sync.get();
-
-	// if (typeof storage["openInOwnTab"] === "undefined") storage["openInOwnTab"] = "0";
-	// var openInOwnTab = false
-	// try {
-	// 	openInOwnTab = !!JSON.parse(storage["openInOwnTab"]);
-	// } catch (e) {
-	// 	openInOwnTab = false;
-	// }
-	if(typeof ownTab === undefined) console.log("Hey! This is undefined");
-	console.log(`openInOwnTab: ${ownTab}`);
+async function setupPopup(ownTab) {
 	await browser.action.onClicked.removeListener(openAsOwnTab);
-	if(ownTab) {
+	if(!!ownTab) {
 		await browser.action.setPopup({ popup: "" });
 		await browser.action.onClicked.addListener(openAsOwnTab);
 	}else{
@@ -471,9 +467,29 @@ browser.commands.onCommand.addListener(function (command) {
 });
 
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.command == "reload_popup_controls") {
-		if('openInOwnTab' in request.options) setupPopup(request.options);
-	}
+	if (request.command === "reload_popup_controls" || request.command === "sync") {
+		let ownTabOpt = "openInOwnTab";
+		if(ownTabOpt in request.options) {
+			let newVal = (request.options[ownTabOpt]);
+			console.log(request.command);
+			console.log(request.options);
+			console.log(`Setting ${ownTabOpt} to new value: ${typeof newVal} ${newVal}`);
+			localforage.setItem(ownTabOpt, newVal).then((newVal) => {
+				console.log("openInOwnTab updated to: " + newVal);
+				setupPopup(newVal);
+			}).catch(function(err){
+				console.log(err);
+			});
+		}
+	} 
+		localforage.getItem('openInOwnTab').then(function(value) {
+			// This code runs once the value has been loaded
+			// from the offline store.
+			// console.log(`openInOwnTab: ${value}`);
+		}).catch(function(err) {
+			// This code runs if there were any errors
+			console.log(err);
+		});
 });
 
 // (async function () {

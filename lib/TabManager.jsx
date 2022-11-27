@@ -165,10 +165,17 @@ class TabManager extends React.Component {
 		this.update = this.update.bind(this);
 		this.windowTitlesText = this.windowTitlesText.bind(this);
 
+		console.log("Constructor: " + this.state.openInOwnTab);
+		browser.runtime.sendMessage({
+			command: "sync",
+			options: this.state
+		})
+
 	}
 	componentWillMount() {
 		this.update();
 	}
+
 	hoverHandler(tab) {
 		this.setState({ topText: tab.title });
 		this.setState({ bottomText: tab.url });
@@ -547,6 +554,7 @@ class TabManager extends React.Component {
 		// box.select();
 		// box.focus();
 	}
+	
 	async sessionSync() {
 		var values = await browser.storage.local.get(null);
 		// console.log(values);
@@ -1553,12 +1561,14 @@ class TabManager extends React.Component {
 	}
 	toggleOpenInOwnTab() {
 		this.state.openInOwnTab = !this.state.openInOwnTab;
-		localStorage["openInOwnTab"] = this.state.openInOwnTab ? "2" : "0";
+		// localStorage["openInOwnTab"] = this.state.openInOwnTab ? "2" : "0";
+		let newVal = this.state.openInOwnTab;
+		localStorage["openInOwnTab"] = newVal;
 		this.openInOwnTabText();
 		browser.runtime.sendMessage({ 
 			command: "reload_popup_controls",
 			options: {
-				"openInOwnTab" : localStorage["openInOwnTab"]
+				"openInOwnTab" : newVal
 			}
 	});
 		this.forceUpdate();
