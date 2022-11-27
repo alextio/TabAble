@@ -165,11 +165,6 @@ class TabManager extends React.Component {
 		this.update = this.update.bind(this);
 		this.windowTitlesText = this.windowTitlesText.bind(this);
 
-		console.log("Constructor: " + this.state.openInOwnTab);
-		browser.runtime.sendMessage({
-			command: "sync",
-			options: this.state
-		})
 
 	}
 	componentWillMount() {
@@ -648,6 +643,11 @@ class TabManager extends React.Component {
 		});
 		//this.state.searchLen = 1;
 		// this.forceUpdate();
+	
+		browser.runtime.sendMessage({
+			command: "sync",
+			options: this.state
+		});
 	}
 	async deleteTabs() {
 		var _this3 = this;

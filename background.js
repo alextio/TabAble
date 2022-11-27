@@ -467,7 +467,7 @@ browser.commands.onCommand.addListener(function (command) {
 });
 
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.command === "reload_popup_controls" || request.command === "sync") {
+	if (request.command === "reload_popup_controls") {
 		let ownTabOpt = "openInOwnTab";
 		if(ownTabOpt in request.options) {
 			let newVal = (request.options[ownTabOpt]);
@@ -481,7 +481,13 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				console.log(err);
 			});
 		}
-	} 
+	} else if (request.command === "sync") {
+		console.log(request.options);
+		Object.keys(request.options).forEach( function(key) {
+			let value = request.options[key];
+			localforage.setItem(key, value);
+		}
+	)}
 		localforage.getItem('openInOwnTab').then(function(value) {
 			// This code runs once the value has been loaded
 			// from the offline store.
