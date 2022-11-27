@@ -9,4 +9,15 @@ package-lock.json
 build/
 source/
 tab-manager*/
-outlib/
+outlib
+lib/diagnostics.js
+outlib/popup.js
+outlib/Session.js
+outlib/Tab.js
+outlib/TabManager.js
+outlib/TabOptions.js
+outlib/TabOptionsFirefox.js
+outlib/Window.js
+outlib/popup.js
+outlib/Session.js
+.gitignore
