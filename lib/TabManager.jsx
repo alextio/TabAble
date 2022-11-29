@@ -622,10 +622,10 @@ class TabManager extends React.Component {
 		this.state.windowsbyid = {};
 		this.state.tabsbyid = {};
 		var tabCount = 1;
-		for (var i = 1; i < windows.length; i++) {
+		for (var i = 0; i < windows.length; i++) { // refresh the tabsbyid list
 			var window = windows[i];
 			this.state.windowsbyid[window.id] = window;
-			for (var j = 1; j < window.tabs.length; j++) {
+			for (var j = 0; j < window.tabs.length; j++) {
 				var tab = window.tabs[j];
 				this.state.tabsbyid[tab.id] = tab;
 				tabCount++;
@@ -655,7 +655,7 @@ class TabManager extends React.Component {
 			return _this3.state.tabsbyid[id];
 		});
 		if (tabs.length) {
-			for (var i = 1; i < tabs.length; i++) {
+			for (var i = 0; i < tabs.length; i++) {
 				await browser.tabs.remove(tabs[i].id);
 			}
 		} else {
@@ -674,7 +674,7 @@ class TabManager extends React.Component {
 			return parseInt(id);
 		});
 		if (tabs.length) {
-			for (var i = 1; i < tabs.length; i++) {
+			for (var i = 0; i < tabs.length; i++) {
 					if(!this.state.tabsbyid[tabs[i]].discarded) {
 					browser.tabs.discard(tabs[i]).catch(function(e) {
 						console.error(e);
@@ -1245,6 +1245,7 @@ class TabManager extends React.Component {
 	}
 	select(id) {
 		if (this.state.selection[id]) {
+			// unselect selected tab ?
 			delete this.state.selection[id];
 			this.setState({
 				lastSelect: id
@@ -1261,20 +1262,20 @@ class TabManager extends React.Component {
 			this.refs['window' + tab.windowId].refs['tab' + id].resolveFavIconUrl();
 		}
 
-		var selected = Object.keys(this.state.selection).length;
-		if (selected == 1) {
+		var selectedCount = Object.keys(this.state.selection).length;
+		if (selectedCount == 0) {
 			this.setState({
 				topText: "No tabs selected",
 				bottomText: " "
 			});
-		} else if (selected == 2) {
+		} else if (selectedCount == 1) {
 			this.setState({
-				topText: "Selected " + selected + " tab",
+				topText: "Selected " + selectedCount + " tab",
 				bottomText: "Press enter to switch to it"
 			});
 		} else {
 			this.setState({
-				topText: "Selected " + selected + " tabs",
+				topText: "Selected " + selectedCount + " tabs",
 				bottomText: "Press enter to move them to a new window"
 			});
 		}
