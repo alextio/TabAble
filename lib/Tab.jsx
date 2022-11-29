@@ -126,16 +126,17 @@ class Tab extends React.Component {
 				this.props.select(tabId);
 			}
 		} else {
-			var backgroundPage = await browser.runtime.getBackgroundPage();
-			if (navigator.userAgent.search("Firefox") > -1) {
-				backgroundPage.focusOnTabAndWindowDelayed({ id: tabId, windowId: windowId });
-			}else{
-				backgroundPage.focusOnTabAndWindow({ id: tabId, windowId: windowId });
-			}
-			if (!!window.inPopup) window.close();
+			// left click
+			// Go to clicked tab
+			// TODO: Bubble these functions up to TabManager instead of calling them here.
+			let activeTab = await browser.tabs.update(tabId, { active: true}); 
+			let activeWindow = await browser.windows.update(windowId, {focused: true});
+			console.log(`${activeWindow.id}, ${activeTab.id} clicked`);
 		}
 		return false;
 	}
+
+
 	dragStart(e) {
 		if (!!this.props.drag) {
 			e.dataTransfer.setData("Text", this.props.tab.id);

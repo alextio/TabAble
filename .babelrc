@@ -5,7 +5,7 @@
   ],
   "compact": false,
   "retainLines": true,
-  "sourceType": "script",
+  "sourceType": "module",
   "plugins": [
     [
       "inline-replace-variables",

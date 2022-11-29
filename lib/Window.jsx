@@ -471,18 +471,57 @@ class Window extends React.Component {
 		}
 	}
 	async windowClick(e) {
-		this.stopProp(e);
-		var backgroundPage = await browser.runtime.getBackgroundPage();
-		var windowId = this.props.window.id;
-		if (navigator.userAgent.search("Firefox") > -1) {
-			backgroundPage.focusOnWindowDelayed(windowId);
-		}else{
-			backgroundPage.focusOnWindow(windowId);
-		}
-		this.props.parentUpdate();
-		if (!!window.inPopup) window.close();
+		// this.stopProp(e);
+		// var backgroundPage = await browser.runtime.getBackgroundPage(); // spits out error: "You do not have a background page." b/c of switch to v3
+		// var windowId = this.props.window.id;
+		// if (navigator.userAgent.search("Firefox") > -1) {
+		// 	backgroundPage.focusOnWindowDelayed(windowId);
+		// }else{
+		// 	backgroundPage.focusOnWindow(windowId);
+		// }
+		// this.props.parentUpdate();
+		// if (!!window.inPopup) window.close();
 		return false;
 	}
+
+	async focusOnTabAndWindow(tab) {
+		var windowId = tab.windowId;
+		var tabId;
+		if (!!tab.tabId) {
+			tabId = tab.tabId;
+		} else {
+			tabId = tab.id;
+		}
+	
+		browser.windows.update(windowId, { focused: true }).then(function(tabId, windowId) {
+			browser.tabs.update(tabId, { active: true }).then(function(tabId, windowId) {
+				tabActiveChanged({ tabId: tabId, windowId: windowId });
+			}.bind(this, tabId, windowId));
+		}.bind(this, tabId, windowId));
+	}
+
+	tabActiveChanged(tab) {
+		if (!!tab && !!tab.tabId) {
+			if (!windows.tabsActive) windows.tabsActive = [];
+			if (!!windows.tabsActive && windows.tabsActive.length > 0) {
+				var lastActive = windows.tabsActive[windows.tabsActive.length - 1];
+				if (!!lastActive && lastActive.tabId == tab.tabId && lastActive.windowId == tab.windowId) {
+					return;
+				}
+			}
+			while (windows.tabsActive.length > 20) {
+				windows.tabsActive.shift();
+			}
+			for (var i = windows.tabsActive.length - 1; i >= 0; i--) {
+				if (windows.tabsActive[i].tabId == tab.tabId) {
+					windows.tabsActive.splice(i, 1);
+				}
+			};
+			windows.tabsActive.push(tab);
+		}
+		updateTabCountDebounce();
+	}
+	
 	selectToFromTab(tabId) {
 		if(tabId) this.props.selectTo(tabId, this.props.tabs);
 	}
