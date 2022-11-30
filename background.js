@@ -1,5 +1,6 @@
 "use strict";
 importScripts('vendor/localforage.min.js');
+importScripts('/lib/autocluster.js');
 
 // TODO: Migrate background.js to service worker and upgrade to Manifest V3. 
 // When migrating to this new background context, you'll need to keep two main things in mind. 
@@ -19,8 +20,7 @@ var browser = browser || chrome;
 function setup(){
 	console.log(self);
 	setupListeners(); 
-	setupStorage();
-	setupPopup();
+	// setupPopup(getItem('settings', 'openInOwnTab'));
 	updateTabCountDebounce();
 
 	// setTimeout(cleanUp, 5000);
@@ -56,6 +56,8 @@ function setupListeners(){
 	browser.windows.onFocusChanged.addListener(windowFocus);
 	browser.windows.onCreated.addListener(windowCreated);
 	browser.windows.onRemoved.addListener(windowRemoved);
+
+	browser.action.onClicked.addListener(openExtension); // will not fire if the action key in manifest is set to 'popup'
 }
 
 async function createWindowWithTabs(tabs, isIncognito) {
@@ -467,36 +469,64 @@ browser.commands.onCommand.addListener(function (command) {
 });
 
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.command === "reload_popup_controls") {
-		let ownTabOpt = "openInOwnTab";
-		if(ownTabOpt in request.options) {
-			let newVal = (request.options[ownTabOpt]);
-			console.log(request.command);
-			console.log(request.options);
-			console.log(`Setting ${ownTabOpt} to new value: ${typeof newVal} ${newVal}`);
-			localforage.setItem(ownTabOpt, newVal).then((newVal) => {
-				console.log("openInOwnTab updated to: " + newVal);
-				setupPopup(newVal);
-			}).catch(function(err){
-				console.log(err);
-			});
+	let settingsObjStore = 'settings';
+	// if (request.command === "reload_popup_controls") {
+	// 	let ownTabOpt = "openInOwnTab";
+	// 	if(ownTabOpt in request.options) {
+	// 		let newVal = (request.options[ownTabOpt]);
+	// 		console.log(request.command);
+	// 		console.log(request.options);
+	// 		console.log(`Setting ${ownTabOpt} to new value: ${typeof newVal} ${newVal}`);
+	// 		localforage.setItem(ownTabOpt, newVal).then((newVal) => {
+	// 			console.log("openInOwnTab updated to: " + newVal);
+	// 			setupPopup(newVal);
+	// 		}).catch(function(err){
+	// 			console.log(err);
+	// 		});
+	// 	}}
+	if (request.command === "update_settings"){
+		let settings = request.params
+		if (settings.name === "openInOwnTab"){
+			if(settings.value === true){
+				// what goes in here?
+			}	
 		}
+		saveItem(settingsObjStore, settings.name, settings.value);
+
 	} else if (request.command === "sync") {
-		console.log(request.options);
-		Object.keys(request.options).forEach( function(key) {
-			let value = request.options[key];
-			localforage.setItem(key, value);
+		console.log(request.params);
+		let settings = request.params;
+		for (const prop in settings){
+			// localforage.setItem(key, value);
+			saveItem(settingsObjStore, prop, settings[prop]);
 		}
-	)}
-		localforage.getItem('openInOwnTab').then(function(value) {
-			// This code runs once the value has been loaded
-			// from the offline store.
-			// console.log(`openInOwnTab: ${value}`);
-		}).catch(function(err) {
-			// This code runs if there were any errors
-			console.log(err);
-		});
+	}
+	update();
 });
+
+function saveItem(objectStoreName, key, value){
+	localforage.config({
+		storeName: objectStoreName
+	});
+	console.log("flag");
+	localforage.setItem(key, value).then((newVal) => {
+		console.log(`${key} updated to ${newVal} in Object Store: ${objectStoreName}`);
+	}).catch((err) => {
+		console.log(err);
+	});
+}
+
+function getItem(objectStoreName, key){
+	localforage.config({
+		storeName: objectStoreName
+	});
+	localforage.getItem(key).then((val) => {
+		console.log(`Retrieved ${key}:${val} from ${objectStoreName}`);
+	}).catch((err) => {
+		console.log(err);
+	}
+	);
+}
 
 // (async function () {
 // 	var windows = await browser.windows.getAll({ populate: true });
@@ -554,6 +584,13 @@ async function cleanUp() {
 	// console.log("after", JSON.parse(JSON.stringify(names)));
 	storage["windowNames"] = JSON.stringify(names);
 
+}
+
+async function openExtension(){
+	let openInOwnTab = getItem("settings", 'openInOwnTab');
+	let popupStr = openInOwnTab ? "" : "popup.html?popup=true";
+	await browser.action.setPopup({popup: popupStr});
+	await browser.action.openPopup();
 }
 
 

@@ -165,6 +165,7 @@ class TabManager extends React.Component {
 		this.update = this.update.bind(this);
 		this.windowTitlesText = this.windowTitlesText.bind(this);
 
+		this.toggleSetting = this.toggleSetting.bind(this);
 
 	}
 	componentWillMount() {
@@ -1521,9 +1522,10 @@ class TabManager extends React.Component {
 		});
 	}
 	toggleDark() {
-		this.state.dark = !this.state.dark;
-		localStorage["dark"] = this.state.dark ? "2" : "0";
-		this.darkText();
+		this.toggleSetting({
+			name: "dark",
+			info: "Dark mode inverts the layout - better on the eyes. Default : off"
+		});
 		if (this.state.dark) {
 			document.body.className = "dark";
 		} else {
@@ -1560,20 +1562,40 @@ class TabManager extends React.Component {
 			bottomText: "Shows the number of open tabs on the Tab Manager icon. Default : on"
 		});
 	}
-	toggleOpenInOwnTab() {
-		this.state.openInOwnTab = !this.state.openInOwnTab;
-		// localStorage["openInOwnTab"] = this.state.openInOwnTab ? "2" : "0";
-		let newVal = this.state.openInOwnTab;
-		localStorage["openInOwnTab"] = newVal;
-		this.openInOwnTabText();
+
+	toggleSetting(setting){
+		let option = setting.name
+		this.state[option] = !(this.state[option]); // all localStorage entries are stored as strings
+		localStorage[option] = this.state[option];
+		this.setState({
+			bottomText: setting.info
+		});
 		browser.runtime.sendMessage({ 
-			command: "reload_popup_controls",
-			options: {
-				"openInOwnTab" : newVal
-			}
-	});
+			command: "update_settings",
+			params: {
+				name: option,
+				value: this.state[option]
+			}});
+	}
+
+	toggleOpenInOwnTab() {
+		// this.state.openInOwnTab = !this.state.openInOwnTab;
+		// // localStorage["openInOwnTab"] = this.state.openInOwnTab ? "2" : "0";
+		// let newVal = this.state.openInOwnTab;
+		// localStorage["openInOwnTab"] = newVal;
+		// this.openInOwnTabText();
+		// browser.runtime.sendMessage({ 
+		// 	command: "reload_popup_controls",
+		// 	options: {
+		// 		"openInOwnTab" : newVal
+		// 	}
+		this.toggleSetting({
+			name: "openInOwnTab",
+			info: "Open the Tab Manager by default in own tab, or as a popup?"
+		});
 		this.forceUpdate();
 	}
+
 	openInOwnTabText() {
 		this.setState({
 			bottomText: "Open the Tab Manager by default in own tab, or as a popup?"
