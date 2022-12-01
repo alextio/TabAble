@@ -46,7 +46,7 @@ function setupListeners(){
 	browser.windows.onRemoved.removeListener(windowRemoved);
 
 	browser.tabs.onCreated.addListener(tabAdded);
-	browser.tabs.onUpdated.addListener(tabRemoved);
+	browser.tabs.onUpdated.addListener(tabUpdated);
 	browser.tabs.onRemoved.addListener(tabRemoved);
 	browser.tabs.onReplaced.addListener(tabRemoved);
 	browser.tabs.onDetached.addListener(tabRemoved);
@@ -57,6 +57,7 @@ function setupListeners(){
 	browser.windows.onCreated.addListener(windowCreated);
 	browser.windows.onRemoved.addListener(windowRemoved);
 
+	browser.webRequest.onCompleted.addListener(logRequest,{urls: ["*://*/*"]});
 	
 	// browser.action.onClicked.addListener(openExtension); // will not fire if the action key in manifest is set to 'popup'
 }
@@ -183,6 +184,7 @@ async function tabAdded(tab) {
 	// } catch (e) {
 	// 	var tabLimit = 0;
 	// }
+	const tabLimit = 0;
 	if (tabLimit > 0) {
 		if (tab.id != browser.tabs.TAB_ID_NONE) {
 			var tabCount = await browser.tabs.query({ currentWindow: true });
@@ -194,7 +196,30 @@ async function tabAdded(tab) {
 	updateTabCountDebounce();
 }
 
+function tabUpdated(tabId, changeInfo, tabInfo){
+	let url = changeInfo.url
+	if (url && !url.startsWith('chrome://')) {
+		const date = Date.now();
+		console.log(`Tab: ${tabId} URL changed to ${url} at ${date}`);
+		browser.scripting.executeScript({ // this works. Don't touch.
+			target: { tabId: tab.id },
+			func: ['readPage.js'] 
+		})
+	  }
+}
 
+function logRequest(details){
+	let tabId = details.tabId;
+	let url = details.url;
+	let method = details.method;
+	let resourceType = details.resourceType; // largely undefined..?
+
+	console.log(method);
+}
+
+function extractPage(url){
+	console.log(`tab moved to ${url}`);
+}
 
 function tabActiveChanged(tab) {
 	if (!!tab && !!tab.tabId) {
@@ -485,13 +510,13 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	// 			console.log(err);
 	// 		});
 	// 	}}
-	if (request.command === "update_settings"){
+	if (request.from === "readPage"){
+		let payload = request.result;
+		console.log(payload);
+	}
+	else if (request.command === "update_settings"){
 		let settings = request.params
-		if (settings.name === "openInOwnTab"){
-			if(settings.value === true){
-				// what goes in here?
-			}	
-		}
+		if (settings.name === "openInOwnTab"){ setupPopup(settings.value); }
 		saveItem(settingsObjStore, settings.name, settings.value);
 
 	} else if (request.command === "sync") {
