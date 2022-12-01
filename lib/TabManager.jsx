@@ -166,7 +166,7 @@ class TabManager extends React.Component {
 		this.windowTitlesText = this.windowTitlesText.bind(this);
 
 		this.toggleSetting = this.toggleSetting.bind(this);
-
+		this.openTabManagerInNewTab = this.openTabManagerInNewTab.bind(this);
 	}
 	componentWillMount() {
 		this.update();
@@ -407,10 +407,15 @@ class TabManager extends React.Component {
 						onClick={this.rateExtension}
 						onMouseEnter={this.hoverIcon}
 					/> */}
-					<div 
+					{/* <div 
 						className="icon windowaction options" 
 						title="Options" 
 						onClick={this.toggleOptions} 
+						onMouseEnter={this.hoverIcon} /> */}
+					<div 
+						className="icon windowaction options" 
+						title="Open in TabAble in Separate Tab" 
+						onClick={this.openTabManagerInNewTab} 
 						onMouseEnter={this.hoverIcon} />
 					<input
 						type="text"
@@ -592,6 +597,9 @@ class TabManager extends React.Component {
 	toggleOptions() {
 		this.state.optionsActive = !this.state.optionsActive;
 		this.forceUpdate();
+	}
+	openTabManagerInNewTab(){
+		browser.tabs.create({ url: "popup.html?popup=false"});	
 	}
 	toggleColors(active, windowId) {
 		if(!!active) {

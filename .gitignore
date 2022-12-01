@@ -4,6 +4,7 @@
 *.crx
 *.tar.gz
 *.sh
+.DS_Store
 node_modules
 package-lock.json
 build/
@@ -20,4 +21,3 @@ outlib/TabOptionsFirefox.js
 outlib/Window.js
 outlib/popup.js
 outlib/Session.js
-.gitignore

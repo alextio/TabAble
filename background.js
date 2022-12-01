@@ -57,7 +57,8 @@ function setupListeners(){
 	browser.windows.onCreated.addListener(windowCreated);
 	browser.windows.onRemoved.addListener(windowRemoved);
 
-	browser.action.onClicked.addListener(openExtension); // will not fire if the action key in manifest is set to 'popup'
+	
+	// browser.action.onClicked.addListener(openExtension); // will not fire if the action key in manifest is set to 'popup'
 }
 
 async function createWindowWithTabs(tabs, isIncognito) {

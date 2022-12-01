@@ -13,8 +13,8 @@ html{
 	margin:0px;
 	user-select:none;
 	font-family:  "interfont",'Graphik', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", 'Helvetica', Roboto, "Helvetica Neue", Arial, sans-serif;
-	min-width: 450px;
-	min-height: 400px;
+	/* min-width: 600px;
+	min-height: 800px; */
 	font-weight: 400;
 	font-size: 16px;
 }
@@ -22,8 +22,8 @@ body{
 	padding:0;
 	margin:0px;
 	-webkit-user-select:none;
-	min-width: 450px;
-	min-height:400px;
+	/* min-width: 600px;
+	min-height:800px; */
 	font-family:  "interfont",'Graphik', -apple-system, system-ui, BlinkMacSystemFont, "interfont", "Segoe UI", 'Helvetica', Roboto, "Helvetica Neue", Arial, sans-serif;
 	font-weight: 400;
 }
@@ -31,8 +31,8 @@ body {
 	background-color: #f1f1f1;
 }
 html,body {
-	min-width: 450px;
-	min-height: 400px;
+	min-width: 800px;
+	min-height: 800px;
 }
 /* #root,#TMP */
 table {
@@ -297,8 +297,9 @@ h1,h2,h3,h4,h5,h6 {
 	transform: scale(1);
 }
 .tab.highlighted {
+	background-color: yellow;
 	border-color: purple;
-	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05) inset, 0px 0px 4px rgba(102, 51, 153, 0.6);
+	box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.05) inset, 0px 0px 4px rgba(102, 51, 153, 0.6);
 }
 .animations .tab.search-active{
 	transform: scale(0.8);
@@ -482,7 +483,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 .options{
 	float:right;
-	background-image:url(../images/wrench64.png);
+	background-image:url(../images/openNewTab64.ico);
 }
 .blocks-big-view{
 	background-image:url(../images/views/big-blocks.png);
