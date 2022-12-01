@@ -18,7 +18,17 @@
 		"contextMenus",
 		"storage",
 		"tabGroups",
-		"windows"
+		"windows",
+		"webRequest"
+	],
+	"host_permissions":[
+		"*://*/*"
+	],
+	"content_scripts":[
+		{
+			"matches": ["*://*/*"],
+			"js": ["lib/readPage.js"]
+		}
 	],
 	"optional_permissions": [
 		"system.display"
