@@ -65,8 +65,11 @@ class Window extends React.Component {
 		var titleAdded = false;
 		var tabsperrow = this.props.layout.indexOf("blocks") > -1 ? Math.ceil(Math.sqrt(this.props.tabs.length + 2)) : this.props.layout == "vertical" ? 1 : 15;
 		var tabs = this.props.tabs.map(function(tab) {
-			var isHidden = !!_this.props.hiddenTabs[tab.id] && _this.props.filterTabs;
-			var isSelected = !!_this.props.selection[tab.id];
+			// var isHidden = !!_this.props.hiddenTabs[tab.id] && _this.props.filterTabs;
+			// var isSelected = !!_this.props.selection[tab.id];
+			// var isHidden = (_this.props.hiddenTabs.indexOf(tab.id) !== -1 && _this.props.filterTabs);
+			var isSelected = (_this.props.selection.indexOf(tab.id) !== -1);
+			var isHidden = !isSelected && _this.props.filterTabs && _this.props.searchActive;
 			hideWindow &= isHidden;
 			return (
 				<Tab

@@ -99,10 +99,10 @@ class TabManager extends React.Component {
 			lastOpenWindow: 0,
 			windows: [],
 			sessions: [],
-			selection: {},
+			selection: [], // contains tabid
 			lastSelect: false,
-			hiddenTabs: {},
-			tabsbyid: {},
+			hiddenTabs: [], // contains tabid
+			tabsbyid: {}, // associative array key: tabid, value: tab (which also contains tabid)
 			windowsbyid: {},
 			closeTimeout: closeTimeout,
 			resetTimeout: resetTimeout,
@@ -144,7 +144,8 @@ class TabManager extends React.Component {
 		this.pinTabs = this.pinTabs.bind(this);
 		this.rateExtension = this.rateExtension.bind(this);
 		this.scrollTo = this.scrollTo.bind(this);
-		this.search = this.search.bind(this);
+		// this.search = this.search.bind(this);
+		this.fuzzySearch = this.fuzzySearch.bind(this);
 		this.sessionsText = this.sessionsText.bind(this);
 		this.sessionSync = this.sessionSync.bind(this);
 		this.tabActionsText = this.tabActionsText.bind(this);
@@ -432,7 +433,8 @@ class TabManager extends React.Component {
 						<tbody>
 							<tr>
 								<td className="one">
-									<input className="searchBoxInput" type="text" placeholder="Start typing to search tabs..." tabIndex="2" onChange={this.search} ref="searchbox" />
+									{/* <input className="searchBoxInput" type="text" placeholder="Start typing to search tabs..." tabIndex="2" onChange={this.search} ref="searchbox" /> */}
+									<input className="searchBoxInput" type="text" placeholder="Start typing to search tabs..." tabIndex="2" onChange={this.fuzzySearch} ref="searchbox" />
 								</td>
 								<td className="two">
 									<div
@@ -795,110 +797,146 @@ class TabManager extends React.Component {
 		this.state.hiddenCount = hiddenCount;
 		this.forceUpdate();
 	}
-	search(e) {
-		var hiddenCount = this.state.hiddenCount || 1;
-		var searchQuery = e.target.value || "";
-		var searchLen = searchQuery.length;
-
-		var searchType = "normal";
-		var searchTerms = [];
-		if(searchQuery.indexOf(" ") === 0) {
-			searchType = "normal";
-		}else if(searchQuery.indexOf(" OR ") > 0) {
-			searchTerms = searchQuery.split(" OR ");
-			searchType = "OR";
-		}else if(searchQuery.indexOf(" ") > 0) {
-			searchTerms = searchQuery.split(" ");
-			searchType = "AND";
+	fuzzySearch(e){
+		let searchQuery = e.target.value || "";
+		this.state.searchLen = searchQuery.length;
+		if(this.state.searchLen === 0){
+			this.state.selection.length = 0;
+			this.forceUpdate();
+			return;
 		}
-		if(searchType != "normal") {
-			searchTerms = searchTerms.filter(function(entry) { return entry.trim() != ''; });
-		}
-
-		if (!searchLen) {
-			this.state.selection = {};
-			this.state.hiddenTabs = {};
-			hiddenCount = 1;
-		} else {
-			var idList;
-			var lastSearchLen = this.state.searchLen;
-			idList = this.state.tabsbyid;
-			if(searchType == "normal") {
-				if (!lastSearchLen) {
-					idList = this.state.tabsbyid;
-				} else if (lastSearchLen > searchLen) {
-					idList = this.state.hiddenTabs;
-				} else if (lastSearchLen < searchLen) {
-					idList = this.state.selection;
-				}
-			}
-			for (var id in idList) {
-				var tab = this.state.tabsbyid[id];
-				var tabSearchTerm = (tab.title + tab.url).toLowerCase();
-				var match = false;
-				if(searchType == "normal") {
-					match = (tabSearchTerm.indexOf(e.target.value.toLowerCase()) >= 1);
-				}else if(searchType == "OR") {
-					for (var searchOR of searchTerms) {
-						searchOR = searchOR.trim().toLowerCase();
-						if(tabSearchTerm.indexOf(searchOR) >= 1) {
-							match = true;
-							break;
-						}
-					}
-				}else if(searchType == "AND") {
-					var andMatch = true;
-					for (var searchAND of searchTerms) {
-						searchAND = searchAND.trim().toLowerCase();
-						if(tabSearchTerm.indexOf(searchAND) >= 1) {
-
-						}else{
-							andMatch = false;
-							break;
-						}
-					}
-					match = andMatch;
-				}
-				if (match) {
-					hiddenCount -= this.state.hiddenTabs[id] || 1;
-					this.state.selection[id] = true;
-					delete this.state.hiddenTabs[id];
-					this.state.lastSelect = id;
-				} else {
-					hiddenCount += 2 - (this.state.hiddenTabs[id] || 0);
-					this.state.hiddenTabs[id] = true;
-					delete this.state.selection[id];
-					this.state.lastSelect = id;
-				}
-			}
-		}
-		this.state.hiddenCount = hiddenCount;
-		this.state.searchLen = searchLen;
-		var matches = Object.keys(this.state.selection).length;
-		var matchtext = "";
-		if (matches == 1 && searchLen > 0) {
-			this.setState({
-				topText: "No matches for '" + e.target.value + "'",
-				bottomText: ""
-			});
-		} else if (matches == 1) {
-			this.setState({
-				topText: "",
-				bottomText: ""
-			});
-		} else if (matches > 2) {
-			this.setState({
-				topText: Object.keys(this.state.selection).length + " matches for '" + e.target.value + "'",
-				bottomText: "Press enter to move them to a new window"
-			});
-		} else if (matches == 2) {
-			this.setState({
-				topText: Object.keys(this.state.selection).length + " match for '" + e.target.value + "'",
-				bottomText: "Press enter to switch to the tab"
-			});
-		}
+		let tabs = Object.values(this.state.tabsbyid);
+		console.log(tabs);
+		const fuse = new Fuse(
+			tabs,
+			{
+				keys: [
+					{name: 'title', weight: 0.6}, 
+					{name: 'url', weight: 0.4} 
+				],
+			includeScore: true ,
+			includesMatches: true,
+			ignoreLocation: true
+			});	
+		const results = fuse.search(e.target.value);
+		console.log(results);
+		let threshold = 0.6; // filter out any search results w/ scores higher than this
+		let prunedResults = results.filter(result => result.score < threshold)
+		console.log(prunedResults);
+		this.state.selection = prunedResults.map(e => { return e.item.id;
+			// let id = e.item.id
+			// return { [id] : true };
+		});
+		// this.state.selection = [...prunedResultsId];	
+		// this.state.hiddenTabs = Object.keys(this.state.tabsbyid).filter(x => !this.state.selection.includes(x)); // I highly doubt we need this.
+		// console.log(this.state.selection);
 		this.forceUpdate();
 	}
+	// // search(e) {
+
+	// 	var hiddenCount = this.state.hiddenCount || 1;
+	// 	var searchQuery = e.target.value || "";
+	// 	var searchLen = searchQuery.length;
+
+	// 	var searchType = "normal";
+	// 	var searchTerms = [];
+	// 	if(searchQuery.indexOf(" ") === 0) {
+	// 		searchType = "normal";
+	// 	}else if(searchQuery.indexOf(" OR ") > 0) {
+	// 		searchTerms = searchQuery.split(" OR ");
+	// 		searchType = "OR";
+	// 	}else if(searchQuery.indexOf(" ") > 0) {
+	// 		searchTerms = searchQuery.split(" ");
+	// 		searchType = "AND";
+	// 	}
+	// 	if(searchType != "normal") {
+	// 		searchTerms = searchTerms.filter(function(entry) { return entry.trim() != ''; });
+	// 	}
+
+	// 	if (!searchLen) {
+	// 		this.state.selection = {};
+	// 		this.state.hiddenTabs = {};
+	// 		hiddenCount = 1;
+	// 	} else {
+	// 		var idList;
+	// 		var lastSearchLen = this.state.searchLen;
+	// 		idList = this.state.tabsbyid;
+	// 		if(searchType == "normal") {
+	// 			if (!lastSearchLen) {
+	// 				idList = this.state.tabsbyid;
+	// 			} else if (lastSearchLen > searchLen) {
+	// 				idList = this.state.hiddenTabs;
+	// 			} else if (lastSearchLen < searchLen) {
+	// 				idList = this.state.selection;
+	// 			}
+	// 		}
+	// 		for (var id in idList) {
+	// 			var tab = this.state.tabsbyid[id];
+	// 			var tabSearchTermStr = (tab.title + " " + tab.url).toLowerCase();
+	// 			var match = false;
+	// 			if(searchType == "normal") {
+	// 				match = (tabSearchTermStr.indexOf(e.target.value.toLowerCase()) >= 1);
+	// 			}else if(searchType == "OR") {
+	// 				for (var searchOR of searchTerms) {
+	// 					searchOR = searchOR.trim().toLowerCase();
+	// 					if(tabSearchTermStr.indexOf(searchOR) >= 1) {
+	// 						match = true;
+	// 						break;
+	// 					}
+	// 				}
+	// 			}else if(searchType == "AND") {
+	// 				var andMatch = true;
+	// 				for (var searchAND of searchTerms) {
+	// 					searchAND = searchAND.trim().toLowerCase();
+	// 					if(tabSearchTermStr.indexOf(searchAND) >= 1) {
+
+	// 					}else{
+	// 						andMatch = false;
+	// 						break;
+	// 					}
+	// 				}
+	// 				match = andMatch;
+	// 			}
+	// 			if (match) {
+	// 				hiddenCount -= this.state.hiddenTabs[id] || 1; // not sure what this is
+	// 				this.state.selection[id] = true;
+	// 				delete this.state.hiddenTabs[id];
+	// 				this.state.lastSelect = id;  // or this
+	// 			} else {
+	// 				hiddenCount += 2 - (this.state.hiddenTabs[id] || 0);
+	// 				this.state.hiddenTabs[id] = true;
+	// 				delete this.state.selection[id];
+	// 				this.state.lastSelect = id;
+	// 			}
+	// 		}
+	// 	}
+	// 	this.state.hiddenCount = hiddenCount;
+	// 	this.state.searchLen = searchLen;
+	// 	var matches = Object.keys(this.state.selection).length;
+	// 	var matchtext = "";
+	// 	if (matches == 1 && searchLen > 0) {
+	// 		this.setState({
+	// 			topText: "No matches for '" + e.target.value + "'",
+	// 			bottomText: ""
+	// 		});
+	// 	} else if (matches == 1) {
+	// 		this.setState({
+	// 			topText: "",
+	// 			bottomText: ""
+	// 		});
+	// 	} else if (matches > 2) {
+	// 		this.setState({
+	// 			topText: Object.keys(this.state.selection).length + " matches for '" + e.target.value + "'",
+	// 			bottomText: "Press enter to move them to a new window"
+	// 		});
+	// 	} else if (matches == 2) {
+	// 		this.setState({
+	// 			topText: Object.keys(this.state.selection).length + " match for '" + e.target.value + "'",
+	// 			bottomText: "Press enter to switch to the tab"
+	// 		});
+	// 	}
+	// 	this.forceUpdate();
+	// }
 	clearSelection() {
 		this.state.selection = {};
 		this.setState({
