@@ -351,7 +351,7 @@ class TabManager extends React.Component {
 							}.bind(this))
 						: false}
 				</div>
-				<div className={"options-container " + (this.state.optionsActive ? "" : "hidden")} ref="options-container">
+				{/* <div className={"options-container " + (this.state.optionsActive ? "" : "hidden")} ref="options-container">
 					<TabOptions
 						compact={this.state.compact}
 						dark={this.state.dark}
@@ -395,7 +395,7 @@ class TabManager extends React.Component {
 						tabActionsText={this.tabActionsText}
 						getTip={this.getTip}
 					/>
-				</div>
+				</div> */}
 				<div className="window top" ref="tophover">
 					{/* <div 
 						className="icon windowaction donate" 
@@ -415,7 +415,7 @@ class TabManager extends React.Component {
 						onMouseEnter={this.hoverIcon} /> */}
 					<div 
 						className="icon windowaction options" 
-						title="Open in TabAble in Separate Tab" 
+						title="Open TabAble in Separate Tab" 
 						onClick={this.openTabManagerInNewTab} 
 						onMouseEnter={this.hoverIcon} />
 					<input

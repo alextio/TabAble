@@ -1,6 +1,6 @@
 "use strict";
-importScripts('vendor/localforage.min.js');
-importScripts('/lib/autocluster.js');
+// importScripts('lib/analytics.js');
+// importScripts('vendor/localforage.min.js');
 
 // TODO: Migrate background.js to service worker and upgrade to Manifest V3. 
 // When migrating to this new background context, you'll need to keep two main things in mind. 
@@ -20,16 +20,15 @@ var browser = browser || chrome;
 function setup(){
 	console.log(self);
 	setupListeners(); 
+	// setupStorage();
 	// setupPopup(getItem('settings', 'openInOwnTab'));
 	updateTabCountDebounce();
-
 	// setTimeout(cleanUp, 5000);
 	console.log("setup completed");
 }
 
 function setupStorage(){
-	// this requires the JS library localForage
-	console.log(localforage);
+
 }
 
 function setupListeners(){
@@ -178,7 +177,6 @@ function tabRemoved() {
 }
 
 async function tabAdded(tab) {
-	// if (typeof localStorage["tabLimit"] === "undefined") localStorage["tabLimit"] = "0";
 	// try {
 	// 	var tabLimit = JSON.parse(localStorage["tabLimit"]);
 	// } catch (e) {
@@ -201,11 +199,16 @@ function tabUpdated(tabId, changeInfo, tabInfo){
 	if (url && !url.startsWith('chrome://')) {
 		const date = Date.now();
 		console.log(`Tab: ${tabId} URL changed to ${url} at ${date}`);
+		readPage(tabId);
+	  }
+}
+
+function readPage(tabId){
 		browser.scripting.executeScript({ // this works. Don't touch.
 			target: { tabId: tab.id },
 			func: ['readPage.js'] 
 		})
-	  }
+
 }
 
 function logRequest(details){
@@ -214,11 +217,7 @@ function logRequest(details){
 	let method = details.method;
 	let resourceType = details.resourceType; // largely undefined..?
 
-	console.log(method);
-}
-
-function extractPage(url){
-	console.log(`tab moved to ${url}`);
+	// console.log(method);
 }
 
 function tabActiveChanged(tab) {
@@ -243,9 +242,9 @@ function tabActiveChanged(tab) {
 	updateTabCountDebounce();
 }
 
-async function openSidebar() {
-	await browser.sidebarAction.open();
-}
+// async function openSidebar() {
+// 	await browser.sidebarAction.open();
+// }
 
 async function openPopup() {
 	if (typeof storage["openInOwnTab"] === "undefined") storage["openInOwnTab"] = "0";
@@ -527,7 +526,6 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			saveItem(settingsObjStore, prop, settings[prop]);
 		}
 	}
-	update();
 });
 
 function saveItem(objectStoreName, key, value){

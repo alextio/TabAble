@@ -21,7 +21,6 @@
     "url": "https://github.com/stefanXO/Tab-Manager/issues"
   },
   "homepage": "https://github.com/stefanXO/Tab-Manager#readme",
-
   "devDependencies": {
     "@babel/cli": "^7.0.0",
     "@babel/core": "^7.0.0",
@@ -33,5 +32,6 @@
     "babel-preset-browser": "^1.0.1",
     "babel-preset-react-app": "^3.1.2"
   },
-  "dependencies": {}
+  "dependencies": {
+  }
 }
