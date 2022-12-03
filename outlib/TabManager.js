@@ -115,7 +115,8 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       optionsActive: !!_this2.props.optionsActive,
       filterTabs: filterTabs,
       dupTabs: false,
-      colorsActive: false
+      colorsActive: false,
+      annotations: []
     };
 
     _this2.addWindow = _this2.addWindow.bind(_assertThisInitialized(_this2));
@@ -566,6 +567,11 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       if (message.command === 'sent_annotation') {
         console.log(message.highlighted_text);
         console.log(message.url);
+
+        this.state.annotations.push({
+          url: message.url,
+          annotation: message.highlighted_text
+        });
       }
     } }, { key: "sessionSync", value: function () {var _sessionSync = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
 
@@ -817,14 +823,16 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         return;
       }
       var tabs = Object.values(this.state.tabsbyid);
-      console.log(tabs);
+      console.log("hello kihoon");
+      console.log(tabs[0]);
       var fuse = new Fuse(
       tabs,
       {
         keys: [
         { name: 'title', weight: 0.6 },
-        { name: 'url', weight: 0.4 }],
-
+        { name: 'url', weight: 0.4 }
+        // {name: 'annotations', weight: 0.3}
+        ],
         includeScore: true,
         includesMatches: true,
         ignoreLocation: true

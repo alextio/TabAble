@@ -115,7 +115,8 @@ class TabManager extends React.Component {
 			optionsActive: !!this.props.optionsActive,
 			filterTabs: filterTabs,
 			dupTabs: false,
-			colorsActive: false
+			colorsActive: false,
+			annotations: []
 		};
 
 		this.addWindow = this.addWindow.bind(this);
@@ -565,7 +566,12 @@ class TabManager extends React.Component {
  	receiveMessage(message, sender, sendResponse) {
 		if(message.command === 'sent_annotation'){
         console.log(message.highlighted_text);
-        console.log(message.url);
+			console.log(message.url);
+			
+			this.state.annotations.push({
+				url: message.url,
+				annotation: message.highlighted_text
+			});
     }
 	}
 	
@@ -817,13 +823,15 @@ class TabManager extends React.Component {
 			return;
 		}
 		let tabs = Object.values(this.state.tabsbyid);
-		console.log(tabs);
+		console.log("hello kihoon");
+		console.log(tabs[0]);
 		const fuse = new Fuse(
 			tabs,
 			{
 				keys: [
 					{name: 'title', weight: 0.6}, 
-					{name: 'url', weight: 0.4} 
+					{name: 'url', weight: 0.4},
+					// {name: 'annotations', weight: 0.3}
 				],
 			includeScore: true ,
 			includesMatches: true,
