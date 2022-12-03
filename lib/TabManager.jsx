@@ -655,10 +655,10 @@ class TabManager extends React.Component {
 		//this.state.searchLen = 1;
 		// this.forceUpdate();
 	
-		browser.runtime.sendMessage({
-			command: "sync",
-			options: this.state
-		});
+		// browser.runtime.sendMessage({
+		// 	command: "sync",
+		// 	options: this.state
+		// });
 	}
 	async deleteTabs() {
 		var _this3 = this;
@@ -1616,12 +1616,12 @@ class TabManager extends React.Component {
 		this.setState({
 			bottomText: setting.info
 		});
-		browser.runtime.sendMessage({ 
-			command: "update_settings",
-			params: {
-				name: option,
-				value: this.state[option]
-			}});
+		// browser.runtime.sendMessage({ 
+		// 	command: "update_settings",
+		// 	params: {
+		// 		name: option,
+		// 		value: this.state[option]
+		// 	}});
 	}
 
 	toggleOpenInOwnTab() {
