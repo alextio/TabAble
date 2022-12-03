@@ -19,7 +19,8 @@
 		"storage",
 		"tabGroups",
 		"windows",
-		"webRequest"
+		"webRequest",
+		"scripting"
 	],
 	"host_permissions":[
 		"*://*/*"
@@ -27,7 +28,7 @@
 	"content_scripts":[
 		{
 			"matches": ["*://*/*"],
-			"js": ["lib/readPage.js"]
+			"js": ["lib/content.js","lib/medium-highlighter.js"]
 		}
 	],
 	"optional_permissions": [

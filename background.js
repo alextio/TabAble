@@ -199,14 +199,22 @@ function tabUpdated(tabId, changeInfo, tabInfo){
 	if (url && !url.startsWith('chrome://')) {
 		const date = Date.now();
 		console.log(`Tab: ${tabId} URL changed to ${url} at ${date}`);
-		readPage(tabId);
+		// readPage(tabId);
+		setupAnnotation(tabId);
 	  }
+}
+
+function setupAnnotation(tabId) {
+			browser.scripting.executeScript({ // this works. Don't touch.
+			target: { tabId: tabId },
+			files: ['lib/content.js', 'lib/medium-highlighter.js'] 
+		})
 }
 
 function readPage(tabId){
 		browser.scripting.executeScript({ // this works. Don't touch.
-			target: { tabId: tab.id },
-			func: ['readPage.js'] 
+			target: { tabId: tabId },
+			files: ['lib/readPage.js'] 
 		})
 
 }
@@ -616,7 +624,6 @@ async function openExtension(){
 	await browser.action.setPopup({popup: popupStr});
 	await browser.action.openPopup();
 }
-
 
 
 // setInterval(setupListeners, 300000);
