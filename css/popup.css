@@ -276,7 +276,7 @@ h1,h2,h3,h4,h5,h6 {
 	opacity:1;
 	/*image-rendering: -webkit-optimize-contrast;*/
 	z-index: 90000;
-	background-color: yellow;
+	background-color: yellow !important;
 /*	-webkit-transform: translate3d(0, 0, 0);
 	-moz-transform: translate3d(0, 0, 0);
 	-ms-transform: translate3d(0, 0, 0);

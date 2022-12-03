@@ -514,10 +514,10 @@ class TabManager extends React.Component {
 										className="icon windowaction new"
 										title={
 											this.state.selection.length > 1
-												? "Move tabs to new window\nWill move " + maybePluralize(this.state.selection.length, 'selected tab') + " to it"
+												? "Move tabs to new window\nWill move " + maybePluralize(this.state.selection.length, 'selected tab') + " to new window"
 												: "Open new empty window"
 										}
-										onClick={this.addWindow}
+										onClick={() => this.addWindow(this.state.selection)}
 										onMouseEnter={this.hoverIcon}
 									/>
 									<div
@@ -711,27 +711,44 @@ class TabManager extends React.Component {
 	discardTab(tabId) {
 		browser.tabs.discard(tabId);
 	}
-	async addWindow() {
-		var _this4 = this;
-		var count = this.state.selection.length;
-		var tabs = this.state.selection.map(function(id) {
-			return _this4.state.tabsbyid[id];
-		});
-
-		if (count == 1) {
-			await browser.windows.create({});
-		} else if (count == 2) {
-			var backgroundPage = await browser.runtime.getBackgroundPage();
-			if (navigator.userAgent.search("Firefox") > 0) {
-				backgroundPage.focusOnTabAndWindowDelayed(tabs[1]);
-			}else{
-				backgroundPage.focusOnTabAndWindow(tabs[1]);
+	async addWindow(tabIds) {
+		let count = tabIds.length;
+		browser.windows.create(
+			{
+				focused: false,
+				tabId: tabIds[0] // otherwise, a new tab will always appear
 			}
-		} else {
-			var backgroundPage = await browser.runtime.getBackgroundPage();
-			backgroundPage.createWindowWithTabs(tabs);
-		}
-		if (!!window.inPopup) window.close();
+		).then((newWindow) => {
+			console.log(newWindow);
+			browser.tabs.move(tabIds, 
+				{
+					windowId: newWindow.id,
+					index: -1
+				}).then((tabs) => {
+					console.log('moved tabs:' + tabs);
+				})
+		});
+		// var _this4 = this;
+		// var count = this.state.selection.length;
+
+		// var tabs = this.state.selection.map(function(id) {
+		// 	return _this4.state.tabsbyid[id];
+		// });
+
+		// if (count == 1) {
+		// 	await browser.windows.create({});
+		// } else if (count == 2) {
+		// 	var backgroundPage = await browser.runtime.getBackgroundPage();
+		// 	if (navigator.userAgent.search("Firefox") > 0) {
+		// 		backgroundPage.focusOnTabAndWindowDelayed(tabs[1]);
+		// 	}else{
+		// 		backgroundPage.focusOnTabAndWindow(tabs[1]);
+		// 	}
+		// } else {
+		// 	var backgroundPage = await browser.runtime.getBackgroundPage();
+		// 	backgroundPage.createWindowWithTabs(tabs);
+		// }
+		// if (!!window.inPopup) window.close();
 	}
 	async pinTabs() {
 		var _this5 = this;
