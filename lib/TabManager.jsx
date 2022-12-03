@@ -727,6 +727,7 @@ class TabManager extends React.Component {
 				}).then((tabs) => {
 					console.log('moved tabs:' + tabs);
 				})
+			this.clearSelection();
 		});
 		// var _this4 = this;
 		// var count = this.state.selection.length;
@@ -1381,7 +1382,7 @@ class TabManager extends React.Component {
 	}
 	drag(e, id) {
 		if (this.state.selection.indexOf(id) == -1) { // if id does not exist
-			this.state.selection.length = 1;
+			// this.state.selection.length = 1;
 			// this.state.selection[id] = true;
 			this.state.selection.push(id);
 			this.state.lastSelect = id;
@@ -1390,35 +1391,46 @@ class TabManager extends React.Component {
 	}
 	async drop(id, before) {
 		var _this6 = this;
-		var tab = this.state.tabsbyid[id];
-		var tabs = this.state.selection.map(function(id) {
-			return _this6.state.tabsbyid[id];
-		});
-		var index = tab.index + (before ? 1 : 1);
+		let targetTab = this.state.tabsbyid[id]; // the tab where the user drops their selection onto
+		// var tabs = this.state.selection.map(function(id) {
+		// 	return _this6.state.tabsbyid[id];
+		// });
+		let targetIndex = targetTab.index + (before ? 0 : 1); // index from where the dragged elements should be placed
+		let targetWindowId = targetTab.windowId;
 
-		for (var i = 1; i < tabs.length; i++) {
-			var t = tabs[i];
-			await browser.tabs.move(t.id, { windowId: tab.windowId, index: index });
-			await browser.tabs.update(t.id, { pinned: t.pinned });
-		}
-		this.setState({
-			selection: {}
+		browser.tabs.move(this.state.selection, {
+			windowId: targetWindowId,
+			index: targetIndex	
 		});
+		// for (var i = 1; i < tabs.length; i++) {
+		// 	var t = tabs[i];
+		// 	await browser.tabs.move(t.id, { windowId: tab.windowId, index: index });
+		// 	await browser.tabs.update(t.id, { pinned: t.pinned });
+		// }
+		this.clearSelection();
+		// this.setState({
+		// 	selection: []
+		// });
 		this.update();
 	}
-	async dropWindow(windowId) {
+	async dropWindow(targetWindowId) {
 		var _this7 = this;
 		var tabs = this.state.selection.map(function(id) {
 			return _this7.state.tabsbyid[id];
 		});
-		for (var i = 1; i < tabs.length; i++) {
-			var t = tabs[i];
-			await browser.tabs.move(t.id, { windowId: windowId, index: 0 });
-			await browser.tabs.update(t.id, { pinned: t.pinned });
-		}
-		this.setState({
-			selection: {}
+		browser.tabs.move(this.state.selection, {
+			windowId: targetWindowId,
+			index: -1
 		});
+		// for (var i = 1; i < tabs.length; i++) {
+		// 	var t = tabs[i];
+		// 	await browser.tabs.move(t.id, { windowId: windowId, index: 0 });
+		// 	await browser.tabs.update(t.id, { pinned: t.pinned });
+		// }
+		this.clearSelection();
+		// this.setState({
+		// 	selection: {}
+		// });
 	}
 	changeTabLimit(e) {
 		this.state.tabLimit = e.target.value;
