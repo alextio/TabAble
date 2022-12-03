@@ -27,7 +27,7 @@ class TabManager extends React.Component {
 		var windowTitles = true;
 		var compact = false;
 		var dark = false;
-		var tabactions = true;
+		var tabactions = false;
 		var badge = true;
 		var sessionsFeature = false;
 		var hideWindows = false;
@@ -47,7 +47,7 @@ class TabManager extends React.Component {
 			if (typeof localStorage["windowTitles"] === "undefined") localStorage["windowTitles"] = "2";
 			if (typeof localStorage["compact"] === "undefined") localStorage["compact"] = "1";
 			if (typeof localStorage["dark"] === "undefined") localStorage["dark"] = "1";
-			if (typeof localStorage["tabactions"] === "undefined") localStorage["tabactions"] = "2";
+			if (typeof localStorage["tabactions"] === "undefined") localStorage["tabactions"] = "1";
 			if (typeof localStorage["badge"] === "undefined") localStorage["badge"] = "2";
 			if (typeof localStorage["sessionsFeature"] === "undefined") localStorage["sessionsFeature"] = "1";
 			if (typeof localStorage["hideWindows"] === "undefined") localStorage["hideWindows"] = "1";
@@ -461,7 +461,7 @@ class TabManager extends React.Component {
 										onClick={this.changelayout}
 										onMouseEnter={this.hoverIcon}
 									/>
-									<div
+									{/* <div
 										className="icon windowaction trash"
 										title={
 											this.state.selection.length > 1
@@ -470,7 +470,7 @@ class TabManager extends React.Component {
 										}
 										onClick={this.deleteTabs}
 										onMouseEnter={this.hoverIcon}
-									/>
+									/> */}
 									<div
 										className="icon windowaction discard"
 										title={
@@ -486,7 +486,7 @@ class TabManager extends React.Component {
 										onClick={this.discardTabs}
 										onMouseEnter={this.hoverIcon}
 									/>
-									<div
+									{/* <div
 										className="icon windowaction pin"
 										title={
 											this.state.selection.length > 1
@@ -495,7 +495,7 @@ class TabManager extends React.Component {
 										}
 										onClick={this.pinTabs}
 										onMouseEnter={this.hoverIcon}
-									/>
+									/> */}
 									<div
 										className={"icon windowaction filter" + (this.state.filterTabs ? " enabled" : "")}
 										title={
@@ -520,12 +520,12 @@ class TabManager extends React.Component {
 										onClick={() => this.addWindow(this.state.selection)}
 										onMouseEnter={this.hoverIcon}
 									/>
-									<div
+									{/* <div
 										className={"icon windowaction duplicates" + (this.state.dupTabs ? " enabled" : "")}
 										title="Highlight Duplicates"
 										onClick={this.highlightDuplicates}
 										onMouseEnter={this.hoverIcon}
-									/>
+									/> */}
 								</td>
 							</tr>
 						</tbody>
@@ -756,13 +756,13 @@ class TabManager extends React.Component {
 		var tabs = this.state.selection
 			.map(function(id) {
 				return _this5.state.tabsbyid[id];
-			})
-			.sort(function(a, b) {
-				return a.index - b.index;
 			});
+			// .sort(function(a, b) {
+			// 	return a.index - b.index;
+			// });
 		if (tabs.length) {
-			if (tabs[1].pinned) tabs.reverse();
-			for (var i = 1; i < tabs.length; i++) {
+			if (tabs[0].pinned) tabs.reverse();
+			for (var i = 0; i < tabs.length; i++) {
 				await browser.tabs.update(tabs[i].id, { pinned: !tabs[1].pinned });
 			}
 		} else {
@@ -772,6 +772,10 @@ class TabManager extends React.Component {
 			}
 		}
 	}
+
+	// highlightDuplicates(e){
+
+	// }
 	// highlightDuplicates(e) {
 	// 	this.state.selection = [];
 	// 	this.state.hiddenTabs = [];
@@ -863,6 +867,7 @@ class TabManager extends React.Component {
 	}
 
 	checkKey(e) {
+		console.log(e);
 		// enter
 		if (e.keyCode == 14) this.addWindow();
 		// escape key
@@ -1408,6 +1413,7 @@ class TabManager extends React.Component {
 		// 	await browser.tabs.update(t.id, { pinned: t.pinned });
 		// }
 		this.clearSelection();
+		
 		// this.setState({
 		// 	selection: []
 		// });
@@ -1703,7 +1709,7 @@ class TabManager extends React.Component {
 	}
 	toggleFilterMismatchedTabs() {
 		this.state.filterTabs = !this.state.filterTabs;
-		localStorage["filter-tabs"] = this.state.filterTabs ? "2" : "0";
+		localStorage["filter-tabs"] = this.state.filterTabs ? true : false;
 		this.forceUpdate();
 	}
 	getTip() {
