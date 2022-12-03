@@ -1185,6 +1185,8 @@ class TabManager extends React.Component {
 			localStorage["layout"] = this.state.layout = "horizontal";
 		} else if (this.state.layout == "horizontal") {
 			localStorage["layout"] = this.state.layout = "vertical";
+		} else if (this.state.layout == "vertical") {
+			localStorage["layout"] = this.state.layout = "tabable";
 		} else {
 			localStorage["layout"] = this.state.layout = "blocks";
 		}
@@ -1199,6 +1201,8 @@ class TabManager extends React.Component {
 			return "horizontal";
 		} else if (this.state.layout == "horizontal") {
 			return "vertical";
+		} else if (this.state.layout == "vertical") {
+			return "tabable";
 		} else {
 			return "blocks";
 		}
@@ -1210,6 +1214,8 @@ class TabManager extends React.Component {
 			return "Big Block";
 		} else if (layout == "horizontal") {
 			return "Horizontal";
+		} else if (layout == "tabable") {
+			return "Tabable";
 		} else {
 			return "Vertical";
 		}

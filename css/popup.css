@@ -198,6 +198,51 @@ h1,h2,h3,h4,h5,h6 {
 .animations .window.blocks-big .tab.selected {
 	transform: scale(1.05);
 }
+
+.window.tabable .icon {
+	border-radius: 5px;
+	height: 1.5rem;
+	width: 1.5rem;
+	background-image: none;
+	/* background-size:1rem 1rem; */
+}
+.window.tabable .tab {
+	border-radius: 5px;
+	height: 10rem;
+	width: 15%;
+	background-image: none;
+	/* background-size:1.5rem 1.5rem; */
+}
+.animations .window.tabable .tab:hover {
+	transform: scale(1.1);
+	filter: none; 
+}
+.animations .window.tabable .tab.search-active{
+	transform: scale(0.9);
+}
+.animations .window.tabable .tab.selected {
+	transform: scale(1.05);
+}
+.iconimage {
+	width: 2rem;
+	height: 2rem;
+	margin: auto;
+	align-self: center;
+}
+.holder {
+	padding: 5%;
+	width: 100%;
+	height: 20rem;
+}
+.name {
+	height: 3rem;
+	width: 90%;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	overflow-wrap: break-word; 
+	font-weight: bold;
+}
+
 .window.searchbox .icon{
 	height: 2rem;
 	width: 2rem;

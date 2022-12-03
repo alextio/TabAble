@@ -1,10 +1,12 @@
 "use strict";
-
 class Tab extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			favIcon: ""
+			favIcon: "",
+			name: "",
+			lastAccessed: "12/4 11:00",
+			keywords: ["1", "2", "3"]
 		};
 
 		this.onHover = this.onHover.bind(this);
@@ -54,6 +56,18 @@ class Tab extends React.Component {
 			);
 		}
 
+
+		if (this.props.layout == "tabable") {
+			children.push(
+				<div class="holder">
+					<img src={this.props.tab.favIconUrl} className="iconimage"></img>
+					<div className="name">{this.props.tab.title}</div>
+					<div className="lastAccessed">Accessed: {this.state.lastAccessed}</div>
+					<div className="keywords">Keywords: {this.state.keywords.join(', ')}</div>
+				</div>
+			);
+		}
+
 		var tabDom = {
 			className:
 				"icon tab " +
@@ -73,13 +87,15 @@ class Tab extends React.Component {
 				" " +
 				(this.props.layout == "vertical" ? "vertical " : "blocks "),
 			style: 
-				(this.props.layout == "vertical"
+				(this.props.layout == "tabable"
 					? { }
 					: { backgroundImage: this.state.favIcon }
 				)
 			,
 			id: this.props.id,
 			title: this.props.tab.title,
+			lastAccessed: this.state.lastAccessed,
+			keywords: this.state.keywords,
 			onClick: this.click,
 			onMouseDown: this.onMouseDown,
 			onMouseEnter: this.onHover
@@ -116,6 +132,12 @@ class Tab extends React.Component {
 		var tabId = this.props.tab.id;
 		var windowId = this.props.window.id;
 
+		var currTime = new Date();
+		var time = currTime.getMonth()+1 + "/" + currTime.getDate() + " " + ("0" + currTime.getHours()).slice(-2) + ':' + currTime.getMinutes();
+		this.setState({
+			lastAccessed: time
+		});
+ 
 		if (e.button === 1) {
 			this.props.middleClick(tabId);
 		} else if (e.button === 2 || e.nativeEvent.metaKey || e.nativeEvent.altKey || e.nativeEvent.shiftKey || e.nativeEvent.ctrlKey) {
