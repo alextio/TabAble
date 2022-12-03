@@ -126,7 +126,6 @@ class TabManager extends React.Component {
 		this.changeTabLimit = this.changeTabLimit.bind(this);
 		this.changeTabWidth = this.changeTabWidth.bind(this);
 		this.checkKey = this.checkKey.bind(this);
-		this.clearSelection = this.clearSelection.bind(this);
 		this.compactText = this.compactText.bind(this);
 		this.darkText = this.darkText.bind(this);
 		this.deleteTabs = this.deleteTabs.bind(this);
@@ -136,7 +135,7 @@ class TabManager extends React.Component {
 		this.exportSessionsText = this.exportSessionsText.bind(this);
 		this.getTip = this.getTip.bind(this);
 		this.hideText = this.hideText.bind(this);
-		this.highlightDuplicates = this.highlightDuplicates.bind(this);
+		// this.highlightDuplicates = this.highlightDuplicates.bind(this);
 		this.hoverIcon = this.hoverIcon.bind(this);
 		this.importSessions = this.importSessions.bind(this);
 		this.importSessionsText = this.importSessionsText.bind(this);
@@ -168,9 +167,28 @@ class TabManager extends React.Component {
 
 		this.toggleSetting = this.toggleSetting.bind(this);
 		this.openTabManagerInNewTab = this.openTabManagerInNewTab.bind(this);
+		this.existsInSelection = this.existsInSelection.bind(this);
+		this.deleteSelection = this.deleteSelection.bind(this);
+		this.clearSelection = this.clearSelection.bind(this);
 	}
 	componentWillMount() {
 		this.update();
+	}
+
+	existsInSelection(tabId){
+		return this.state.selection.indexOf(tabId) !== -1 ? true : false;
+	}
+
+	deleteSelection(tabId){
+		let index = this.state.selection.indexOf(tabId);
+		if(index !== -1) { this.state.selection.splice(index,1); }
+	}
+
+	clearSelection() {
+		this.state.selection.length = 0; // clears the array, weirdly enough
+		this.setState({
+			lastSelect: false
+		});
 	}
 
 	hoverHandler(tab) {
@@ -446,8 +464,8 @@ class TabManager extends React.Component {
 									<div
 										className="icon windowaction trash"
 										title={
-											Object.keys(this.state.selection).length > 1
-												? "Close selected tabs\nWill close " + maybePluralize(Object.keys(this.state.selection).length, 'tab')
+											this.state.selection.length > 1
+												? "Close selected tabs\nWill close " + maybePluralize(this.state.selection.length, 'tab')
 												: "Close current Tab"
 										}
 										onClick={this.deleteTabs}
@@ -456,12 +474,12 @@ class TabManager extends React.Component {
 									<div
 										className="icon windowaction discard"
 										title={
-											Object.keys(this.state.selection).length > 1
-												? "Discard selected tabs\nWill discard " + maybePluralize(Object.keys(this.state.selection).length, 'tab') + " - freeing memory"
+											this.state.selection.length > 1
+												? "Discard selected tabs\nWill discard " + maybePluralize(this.state.selection.length, 'tab') + " - freeing memory"
 												: "Select tabs to discard them and free memory"
 										}
 										style={
-											Object.keys(this.state.selection).length > 1
+											this.state.selection.length > 1
 												? {}
 												: { opacity: 1.25 }
 										}
@@ -471,8 +489,8 @@ class TabManager extends React.Component {
 									<div
 										className="icon windowaction pin"
 										title={
-											Object.keys(this.state.selection).length > 1
-												? "Pin selected tabs\nWill pin " + maybePluralize(Object.keys(this.state.selection).length, 'tab')
+											this.state.selection.length > 1
+												? "Pin selected tabs\nWill pin " + maybePluralize(this.state.selection.length, 'tab')
 												: "Pin current Tab"
 										}
 										onClick={this.pinTabs}
@@ -486,7 +504,7 @@ class TabManager extends React.Component {
 											(this.state.searchLen > 1
 												? "\n" +
 													(this.state.filterTabs ? "Will reveal " : "Will hide ") +
-													maybePluralize((Object.keys(this.state.tabsbyid).length - Object.keys(this.state.selection).length), 'tab')
+													maybePluralize((Object.keys(this.state.tabsbyid).length - this.state.selection.length), 'tab')
 												: "")
 										}
 										onClick={this.toggleFilterMismatchedTabs}
@@ -495,8 +513,8 @@ class TabManager extends React.Component {
 									<div
 										className="icon windowaction new"
 										title={
-											Object.keys(this.state.selection).length > 1
-												? "Move tabs to new window\nWill move " + maybePluralize(Object.keys(this.state.selection).length, 'selected tab') + " to it"
+											this.state.selection.length > 1
+												? "Move tabs to new window\nWill move " + maybePluralize(this.state.selection.length, 'selected tab') + " to it"
 												: "Open new empty window"
 										}
 										onClick={this.addWindow}
@@ -628,7 +646,7 @@ class TabManager extends React.Component {
 			return 1;
 		});
 
-		this.state.lastOpenWindow = windows[1].id;
+		this.state.lastOpenWindow = windows[0].id;
 		this.state.windows = windows;
 		this.state.windowsbyid = {};
 		this.state.tabsbyid = {};
@@ -644,7 +662,7 @@ class TabManager extends React.Component {
 		}
 		for (var id in this.state.selection) {
 			if (!this.state.tabsbyid[id]) {
-				delete this.state.selection[id];
+				this.deleteSelection(id);
 				this.state.lastSelect = id;
 			}
 		}
@@ -652,17 +670,11 @@ class TabManager extends React.Component {
 		this.setState({
 			tabCount: tabCount
 		});
-		//this.state.searchLen = 1;
-		// this.forceUpdate();
 	
-		// browser.runtime.sendMessage({
-		// 	command: "sync",
-		// 	options: this.state
-		// });
 	}
 	async deleteTabs() {
 		var _this3 = this;
-		var tabs = Object.keys(this.state.selection).map(function(id) {
+		var tabs = this.state.selection.map(function(id) {
 			return _this3.state.tabsbyid[id];
 		});
 		if (tabs.length) {
@@ -681,7 +693,7 @@ class TabManager extends React.Component {
 		browser.tabs.remove(tabId);
 	}
 	async discardTabs() {
-		var tabs = Object.keys(this.state.selection).map(function(id) {
+		var tabs = this.state.selection.map(function(id) {
 			return parseInt(id);
 		});
 		if (tabs.length) {
@@ -701,8 +713,8 @@ class TabManager extends React.Component {
 	}
 	async addWindow() {
 		var _this4 = this;
-		var count = Object.keys(this.state.selection).length;
-		var tabs = Object.keys(this.state.selection).map(function(id) {
+		var count = this.state.selection.length;
+		var tabs = this.state.selection.map(function(id) {
 			return _this4.state.tabsbyid[id];
 		});
 
@@ -723,7 +735,7 @@ class TabManager extends React.Component {
 	}
 	async pinTabs() {
 		var _this5 = this;
-		var tabs = Object.keys(this.state.selection)
+		var tabs = this.state.selection
 			.map(function(id) {
 				return _this5.state.tabsbyid[id];
 			})
@@ -742,61 +754,62 @@ class TabManager extends React.Component {
 			}
 		}
 	}
-	highlightDuplicates(e) {
-		this.state.selection = {};
-		this.state.hiddenTabs = {};
-		this.state.searchLen = 1;
-		this.state.dupTabs = !this.state.dupTabs;
-		this.refs.searchbox.value = "";
-		if (!this.state.dupTabs) {
-			this.state.hiddenCount = 1;
-			this.forceUpdate();
-			return;
-		}
-		var hiddenCount = this.state.hiddenCount || 1;
-		var idList = this.state.tabsbyid;
-		var dup = [];
-		for (var id in idList) {
-			var tab = this.state.tabsbyid[id];
-			for (var id3 in idList) {
-				if (id == id3) continue;
-				var tab3 = this.state.tabsbyid[id2];
-				if (tab.url == tab3.url) {
-					dup.push(id);
-					break;
-				}
-			}
-		}
-		for (var id in dup) {
-			this.state.searchLen++;
-			hiddenCount -= this.state.hiddenTabs[dup[id]] || 1;
-			this.state.selection[dup[id]] = true;
-			delete this.state.hiddenTabs[dup[id]];
-			this.state.lastSelect = dup[id];
-		}
-		for (var id in idList) {
-			var tab = this.state.tabsbyid[id];
-			if (dup.indexOf(id) === 0) {
-				hiddenCount += 2 - (this.state.hiddenTabs[id] || 0);
-				this.state.hiddenTabs[id] = true;
-				delete this.state.selection[id];
-				this.state.lastSelect = id;
-			}
-		}
-		if (dup.length == 1) {
-			this.setState({
-				topText: "No duplicates found",
-				bottomText: " "
-			});
-		} else {
-			this.setState({
-				topText: "Highlighted " + dup.length + " duplicate tabs",
-				bottomText: "Press enter to move them to a new window"
-			});
-		}
-		this.state.hiddenCount = hiddenCount;
-		this.forceUpdate();
-	}
+	// highlightDuplicates(e) {
+	// 	this.state.selection = [];
+	// 	this.state.hiddenTabs = [];
+	// 	this.state.searchLen = 1;
+	// 	this.state.dupTabs = !this.state.dupTabs;
+	// 	this.refs.searchbox.value = "";
+	// 	if (!this.state.dupTabs) {
+	// 		this.state.hiddenCount = 1;
+	// 		this.forceUpdate();
+	// 		return;
+	// 	}
+	// 	var hiddenCount = this.state.hiddenCount || 1;
+	// 	var idList = this.state.tabsbyid;
+	// 	var dup = [];
+	// 	for (var id in idList) {
+	// 		var tab = this.state.tabsbyid[id];
+	// 		for (var id3 in idList) {
+	// 			if (id == id3) continue;
+	// 			var tab3 = this.state.tabsbyid[id2];
+	// 			if (tab.url == tab3.url) {
+	// 				dup.push(id);
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// 	for (var id in dup) {
+	// 		this.state.searchLen++;
+	// 		hiddenCount -= this.state.hiddenTabs[dup[id]] || 1;
+	// 		this.state.selection[dup[id]] = true;
+	// 		delete this.state.hiddenTabs[dup[id]];
+	// 		this.state.lastSelect = dup[id];
+	// 	}
+	// 	for (var id in idList) {
+	// 		var tab = this.state.tabsbyid[id];
+	// 		if (dup.indexOf(id) === 0) {
+	// 			hiddenCount += 2 - (this.state.hiddenTabs[id] || 0);
+	// 			this.state.hiddenTabs[id] = true;
+	// 			delete this.state.selection[id];
+	// 			this.state.lastSelect = id;
+	// 		}
+	// 	}
+	// 	if (dup.length == 1) {
+	// 		this.setState({
+	// 			topText: "No duplicates found",
+	// 			bottomText: " "
+	// 		});
+	// 	} else {
+	// 		this.setState({
+	// 			topText: "Highlighted " + dup.length + " duplicate tabs",
+	// 			bottomText: "Press enter to move them to a new window"
+	// 		});
+	// 	}
+	// 	this.state.hiddenCount = hiddenCount;
+	// 	this.forceUpdate();
+	// }
+
 	fuzzySearch(e){
 		let searchQuery = e.target.value || "";
 		this.state.searchLen = searchQuery.length;
@@ -827,128 +840,16 @@ class TabManager extends React.Component {
 			// let id = e.item.id
 			// return { [id] : true };
 		});
-		// this.state.selection = [...prunedResultsId];	
-		// this.state.hiddenTabs = Object.keys(this.state.tabsbyid).filter(x => !this.state.selection.includes(x)); // I highly doubt we need this.
-		// console.log(this.state.selection);
+	
 		this.forceUpdate();
 	}
-	// // search(e) {
 
-	// 	var hiddenCount = this.state.hiddenCount || 1;
-	// 	var searchQuery = e.target.value || "";
-	// 	var searchLen = searchQuery.length;
-
-	// 	var searchType = "normal";
-	// 	var searchTerms = [];
-	// 	if(searchQuery.indexOf(" ") === 0) {
-	// 		searchType = "normal";
-	// 	}else if(searchQuery.indexOf(" OR ") > 0) {
-	// 		searchTerms = searchQuery.split(" OR ");
-	// 		searchType = "OR";
-	// 	}else if(searchQuery.indexOf(" ") > 0) {
-	// 		searchTerms = searchQuery.split(" ");
-	// 		searchType = "AND";
-	// 	}
-	// 	if(searchType != "normal") {
-	// 		searchTerms = searchTerms.filter(function(entry) { return entry.trim() != ''; });
-	// 	}
-
-	// 	if (!searchLen) {
-	// 		this.state.selection = {};
-	// 		this.state.hiddenTabs = {};
-	// 		hiddenCount = 1;
-	// 	} else {
-	// 		var idList;
-	// 		var lastSearchLen = this.state.searchLen;
-	// 		idList = this.state.tabsbyid;
-	// 		if(searchType == "normal") {
-	// 			if (!lastSearchLen) {
-	// 				idList = this.state.tabsbyid;
-	// 			} else if (lastSearchLen > searchLen) {
-	// 				idList = this.state.hiddenTabs;
-	// 			} else if (lastSearchLen < searchLen) {
-	// 				idList = this.state.selection;
-	// 			}
-	// 		}
-	// 		for (var id in idList) {
-	// 			var tab = this.state.tabsbyid[id];
-	// 			var tabSearchTermStr = (tab.title + " " + tab.url).toLowerCase();
-	// 			var match = false;
-	// 			if(searchType == "normal") {
-	// 				match = (tabSearchTermStr.indexOf(e.target.value.toLowerCase()) >= 1);
-	// 			}else if(searchType == "OR") {
-	// 				for (var searchOR of searchTerms) {
-	// 					searchOR = searchOR.trim().toLowerCase();
-	// 					if(tabSearchTermStr.indexOf(searchOR) >= 1) {
-	// 						match = true;
-	// 						break;
-	// 					}
-	// 				}
-	// 			}else if(searchType == "AND") {
-	// 				var andMatch = true;
-	// 				for (var searchAND of searchTerms) {
-	// 					searchAND = searchAND.trim().toLowerCase();
-	// 					if(tabSearchTermStr.indexOf(searchAND) >= 1) {
-
-	// 					}else{
-	// 						andMatch = false;
-	// 						break;
-	// 					}
-	// 				}
-	// 				match = andMatch;
-	// 			}
-	// 			if (match) {
-	// 				hiddenCount -= this.state.hiddenTabs[id] || 1; // not sure what this is
-	// 				this.state.selection[id] = true;
-	// 				delete this.state.hiddenTabs[id];
-	// 				this.state.lastSelect = id;  // or this
-	// 			} else {
-	// 				hiddenCount += 2 - (this.state.hiddenTabs[id] || 0);
-	// 				this.state.hiddenTabs[id] = true;
-	// 				delete this.state.selection[id];
-	// 				this.state.lastSelect = id;
-	// 			}
-	// 		}
-	// 	}
-	// 	this.state.hiddenCount = hiddenCount;
-	// 	this.state.searchLen = searchLen;
-	// 	var matches = Object.keys(this.state.selection).length;
-	// 	var matchtext = "";
-	// 	if (matches == 1 && searchLen > 0) {
-	// 		this.setState({
-	// 			topText: "No matches for '" + e.target.value + "'",
-	// 			bottomText: ""
-	// 		});
-	// 	} else if (matches == 1) {
-	// 		this.setState({
-	// 			topText: "",
-	// 			bottomText: ""
-	// 		});
-	// 	} else if (matches > 2) {
-	// 		this.setState({
-	// 			topText: Object.keys(this.state.selection).length + " matches for '" + e.target.value + "'",
-	// 			bottomText: "Press enter to move them to a new window"
-	// 		});
-	// 	} else if (matches == 2) {
-	// 		this.setState({
-	// 			topText: Object.keys(this.state.selection).length + " match for '" + e.target.value + "'",
-	// 			bottomText: "Press enter to switch to the tab"
-	// 		});
-	// 	}
-	// 	this.forceUpdate();
-	// }
-	clearSelection() {
-		this.state.selection = {};
-		this.setState({
-			lastSelect: false
-		});
-	}
 	checkKey(e) {
 		// enter
 		if (e.keyCode == 14) this.addWindow();
 		// escape key
 		if (e.keyCode == 28) {
-			if(this.state.searchLen > 1 || Object.keys(this.state.selection).length > 0) {
+			if(this.state.searchLen > 1 || this.state.selection.length > 0) {
 				// stop popup from closing if we have search text or selection active
 				e.nativeEvent.preventDefault();
 				e.nativeEvent.stopPropagation();
@@ -1003,7 +904,7 @@ class TabManager extends React.Component {
 				}
 				var altKey = e.nativeEvent.metaKey || e.nativeEvent.altKey || e.nativeEvent.shiftKey || e.nativeEvent.ctrlKey;
 				if (goLeft || goRight) {
-					var selectedTabs = Object.keys(this.state.selection);
+					var selectedTabs = this.state.selection;
 					if (!altKey && selectedTabs.length > 2) {
 					} else {
 						var found = false;
@@ -1050,7 +951,7 @@ class TabManager extends React.Component {
 									last = _t.id;
 									if (!first) first = _t.id;
 									if (!selectedTab) {
-										if (!altKey) this.state.selection = {};
+										if (!altKey) this.clearSelection();
 										this.select(_t.id);
 										found = true;
 										break;
@@ -1059,13 +960,13 @@ class TabManager extends React.Component {
 										if (goRight) {
 											selectedNext = true;
 										} else if (prev) {
-											if (!altKey) this.state.selection = {};
+											if (!altKey) this.clearSelection();
 											this.select(prev);
 											found = true;
 											break;
 										}
 									} else if (selectedNext) {
-										if (!altKey) this.state.selection = {};
+										if (!altKey) this.clearSelection();
 										this.select(_t.id);
 										found = true;
 										break;
@@ -1082,7 +983,7 @@ class TabManager extends React.Component {
 									last = _t.id;
 									if (!first) first = _t.id;
 									if (!selectedTab) {
-										if (!altKey) this.state.selection = {};
+										if (!altKey) this.clearSelection();
 										this.select(_t.id);
 										found = true;
 										break;
@@ -1090,13 +991,13 @@ class TabManager extends React.Component {
 										if (goRight) {
 											selectedNext = true;
 										} else if (prev) {
-											if (!altKey) this.state.selection = {};
+											if (!altKey) this.clearSelection();
 											this.select(prev);
 											found = true;
 											break;
 										}
 									} else if (selectedNext) {
-										if (!altKey) this.state.selection = {};
+										if (!altKey) this.clearSelection();
 										this.select(_t.id);
 										found = true;
 										break;
@@ -1107,19 +1008,19 @@ class TabManager extends React.Component {
 							}
 						}
 						if (!found && goRight && first) {
-							if (!altKey) this.state.selection = {};
+							if (!altKey) this.clearSelection();
 							this.select(first);
 							found = true;
 						}
 						if (!found && goLeft && last) {
-							if (!altKey) this.state.selection = {};
+							if (!altKey) this.clearSelection();
 							this.select(last);
 							found = true;
 						}
 					}
 				}
 				if (goUp || goDown) {
-					var selectedTabs = Object.keys(this.state.selection);
+					var selectedTabs = this.state.selection;
 					if (selectedTabs.length > 2) {
 					} else {
 						var found = false;
@@ -1210,14 +1111,14 @@ class TabManager extends React.Component {
 						// console.log(found, goDown, first);
 						if (!found && goDown && first) {
 							// console.log("go first", first);
-							this.state.selection = {};
+							this.clearSelection();
 							this.selectWindowTab(first, tabPosition);
 							found = true;
 						}
 						// console.log(found, goUp, last);
 						if (!found && goUp && last) {
 							// console.log("go last", last);
-							this.state.selection = {};
+							this.clearSelection();
 							this.selectWindowTab(last, tabPosition);
 							found = true;
 						}
@@ -1240,7 +1141,7 @@ class TabManager extends React.Component {
 			for (var _t of _w.tabs) {
 				i++;
 				if ((_w.tabs.length >= tabPosition && tabPosition == i) || (_w.tabs.length < tabPosition && _w.tabs.length == i)) {
-					this.state.selection = {};
+					this.clearSelection();
 					this.select(_t.id);
 				}
 			}
@@ -1291,14 +1192,14 @@ class TabManager extends React.Component {
 		}
 	}
 	select(id) {
-		if (this.state.selection[id]) {
+		if (this.existsInSelection(id)) {
 			// unselect selected tab ?
-			delete this.state.selection[id];
+			this.deleteSelection(id);
 			this.setState({
 				lastSelect: id
 			});
 		} else {
-			this.state.selection[id] = true;
+			this.state.selection.push(id);
 			this.setState({
 				lastSelect: id
 			});
@@ -1309,7 +1210,7 @@ class TabManager extends React.Component {
 			this.refs['window' + tab.windowId].refs['tab' + id].resolveFavIconUrl();
 		}
 
-		var selectedCount = Object.keys(this.state.selection).length;
+		var selectedCount = this.state.selection.length;
 		if (selectedCount == 0) {
 			this.setState({
 				topText: "No tabs selected",
@@ -1335,11 +1236,11 @@ class TabManager extends React.Component {
 			return;
 		}
 		if (!!lastSelect) {
-			if (this.state.selection[lastSelect]) {
+			if (this.existsInSelection(lastSelect)) {
 				activate = true;
 			}
 		} else {
-			if (this.state.selection[id]) {
+			if (this.state.selection.indexOf(id) !== -1) {
 				activate = false;
 			} else {
 				activate = true;
@@ -1366,7 +1267,7 @@ class TabManager extends React.Component {
 			for (var i = 1; i < tabs.length; i++) {
 				var tabId = tabs[i].id;
 				if (tabId != id) {
-					if (this.state.selection[tabId]) {
+					if (this.state.selection.indexOf(tabId) !== -1) {
 						neighbours.push(tabId);
 					}
 				}
@@ -1431,16 +1332,18 @@ class TabManager extends React.Component {
 			if (i >= rangeIndex2 && i <= rangeIndex2) {
 				var tabId = tabs[i].id;
 				if (activate) {
-					this.state.selection[tabId] = true;
+					this.state.selection.push(tabId);
 				} else {
-					delete this.state.selection[tabId];
+					// let index = this.state.selection.indexOf(tabId);
+					// index !== -1 && this.state.selection.splice(index,1);
+					this.deleteSelection(tabId);
 				}
 			}
 		}
 
 		this.scrollTo('tab', this.state.lastSelect);
 
-		var selected = Object.keys(this.state.selection).length;
+		var selected = this.state.selection.length;
 		if (selected == 1) {
 			this.setState({
 				topText: "No tabs selected",
@@ -1460,9 +1363,10 @@ class TabManager extends React.Component {
 		this.forceUpdate();
 	}
 	drag(e, id) {
-		if (!this.state.selection[id]) {
-			this.state.selection = {};
-			this.state.selection[id] = true;
+		if (this.state.selection.indexOf(id) == -1) { // if id does not exist
+			this.state.selection.length = 1;
+			// this.state.selection[id] = true;
+			this.state.selection.push(id);
 			this.state.lastSelect = id;
 		}
 		this.forceUpdate();
@@ -1470,7 +1374,7 @@ class TabManager extends React.Component {
 	async drop(id, before) {
 		var _this6 = this;
 		var tab = this.state.tabsbyid[id];
-		var tabs = Object.keys(this.state.selection).map(function(id) {
+		var tabs = this.state.selection.map(function(id) {
 			return _this6.state.tabsbyid[id];
 		});
 		var index = tab.index + (before ? 1 : 1);
@@ -1487,7 +1391,7 @@ class TabManager extends React.Component {
 	}
 	async dropWindow(windowId) {
 		var _this7 = this;
-		var tabs = Object.keys(this.state.selection).map(function(id) {
+		var tabs = this.state.selection.map(function(id) {
 			return _this7.state.tabsbyid[id];
 		});
 		for (var i = 1; i < tabs.length; i++) {

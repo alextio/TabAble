@@ -119,13 +119,15 @@ class Tab extends React.Component {
 		if (e.button === 1) {
 			this.props.middleClick(tabId);
 		} else if (e.button === 2 || e.nativeEvent.metaKey || e.nativeEvent.altKey || e.nativeEvent.shiftKey || e.nativeEvent.ctrlKey) {
+			// console.log("right click!");
+			this.props.select(tabId);
 			// right click
-			e.preventDefault();
-			if (e.button === 2 && (e.nativeEvent.metaKey || e.nativeEvent.altKey || e.nativeEvent.shiftKey || e.nativeEvent.ctrlKey)) {
-				this.props.selectTo(tabId);
-			} else {
-				this.props.select(tabId);
-			}
+			// e.preventDefault();
+			// if (e.button === 2 && (e.nativeEvent.metaKey || e.nativeEvent.altKey || e.nativeEvent.shiftKey || e.nativeEvent.ctrlKey)) {
+			// 	this.props.selectTo(tabId);
+			// } else {
+			// 	this.props.select(tabId);
+			// }
 		} else {
 			// left click
 			// Go to clicked tab
