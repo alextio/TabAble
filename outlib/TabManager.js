@@ -27,7 +27,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     var windowTitles = true;
     var compact = false;
     var dark = false;
-    var tabactions = true;
+    var tabactions = false;
     var badge = true;
     var sessionsFeature = false;
     var hideWindows = false;
@@ -47,7 +47,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       if (typeof localStorage["windowTitles"] === "undefined") localStorage["windowTitles"] = "2";
       if (typeof localStorage["compact"] === "undefined") localStorage["compact"] = "1";
       if (typeof localStorage["dark"] === "undefined") localStorage["dark"] = "1";
-      if (typeof localStorage["tabactions"] === "undefined") localStorage["tabactions"] = "2";
+      if (typeof localStorage["tabactions"] === "undefined") localStorage["tabactions"] = "1";
       if (typeof localStorage["badge"] === "undefined") localStorage["badge"] = "2";
       if (typeof localStorage["sessionsFeature"] === "undefined") localStorage["sessionsFeature"] = "1";
       if (typeof localStorage["hideWindows"] === "undefined") localStorage["hideWindows"] = "1";
@@ -224,7 +224,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       //this.update();
       this.forceUpdate();
     } }, { key: "render", value:
-    function render() {
+    function render() {var _this4 = this;
       var _this = this;
 
       var hiddenCount = this.state.hiddenCount || 1;
@@ -461,15 +461,15 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
           onClick: this.changelayout,
           onMouseEnter: this.hoverIcon }), /*#__PURE__*/
 
-        React.createElement("div", {
-          className: "icon windowaction trash",
-          title:
-          this.state.selection.length > 1 ?
-          "Close selected tabs\nWill close " + maybePluralize(this.state.selection.length, 'tab') :
-          "Close current Tab",
 
-          onClick: this.deleteTabs,
-          onMouseEnter: this.hoverIcon }), /*#__PURE__*/
+
+
+
+
+
+
+
+
 
         React.createElement("div", {
           className: "icon windowaction discard",
@@ -486,15 +486,15 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
           onClick: this.discardTabs,
           onMouseEnter: this.hoverIcon }), /*#__PURE__*/
 
-        React.createElement("div", {
-          className: "icon windowaction pin",
-          title:
-          this.state.selection.length > 1 ?
-          "Pin selected tabs\nWill pin " + maybePluralize(this.state.selection.length, 'tab') :
-          "Pin current Tab",
 
-          onClick: this.pinTabs,
-          onMouseEnter: this.hoverIcon }), /*#__PURE__*/
+
+
+
+
+
+
+
+
 
         React.createElement("div", {
           className: "icon windowaction filter" + (this.state.filterTabs ? " enabled" : ""),
@@ -514,17 +514,17 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
           className: "icon windowaction new",
           title:
           this.state.selection.length > 1 ?
-          "Move tabs to new window\nWill move " + maybePluralize(this.state.selection.length, 'selected tab') + " to it" :
+          "Move tabs to new window\nWill move " + maybePluralize(this.state.selection.length, 'selected tab') + " to new window" :
           "Open new empty window",
 
-          onClick: this.addWindow,
-          onMouseEnter: this.hoverIcon }), /*#__PURE__*/
-
-        React.createElement("div", {
-          className: "icon windowaction duplicates" + (this.state.dupTabs ? " enabled" : ""),
-          title: "Highlight Duplicates",
-          onClick: this.highlightDuplicates,
+          onClick: function onClick() {return _this4.addWindow(_this4.state.selection);},
           onMouseEnter: this.hoverIcon })))))), /*#__PURE__*/
+
+
+
+
+
+
 
 
 
@@ -711,40 +711,58 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     function discardTab(tabId) {
       browser.tabs.discard(tabId);
     } }, { key: "addWindow", value: function () {var _addWindow = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-      function _callee5() {var _this4, count, tabs, backgroundPage;return _regeneratorRuntime().wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:
-                _this4 = this;
-                count = this.state.selection.length;
-                tabs = this.state.selection.map(function (id) {
-                  return _this4.state.tabsbyid[id];
-                });if (!(
+      function _callee5(tabIds) {var _this8 = this;var count;return _regeneratorRuntime().wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:
+                count = tabIds.length;
+                browser.windows.create(
+                {
+                  focused: false,
+                  tabId: tabIds[0] // otherwise, a new tab will always appear
+                }).
+                then(function (newWindow) {
+                  console.log(newWindow);
+                  browser.tabs.move(tabIds,
+                  {
+                    windowId: newWindow.id,
+                    index: -1
+                  }).then(function (tabs) {
+                    console.log('moved tabs:' + tabs);
+                  });
+                  _this8.clearSelection();
+                });
+                // var _this4 = this;
+                // var count = this.state.selection.length;
 
-                count == 1)) {_context5.next = 8;break;}_context5.next = 6;return (
-                  browser.windows.create({}));case 6:_context5.next = 19;break;case 8:if (!(
-                count == 2)) {_context5.next = 15;break;}_context5.next = 11;return (
-                  browser.runtime.getBackgroundPage());case 11:backgroundPage = _context5.sent;
-                if (navigator.userAgent.search("Firefox") > 0) {
-                  backgroundPage.focusOnTabAndWindowDelayed(tabs[1]);
-                } else {
-                  backgroundPage.focusOnTabAndWindow(tabs[1]);
-                }_context5.next = 19;break;case 15:_context5.next = 17;return (
+                // var tabs = this.state.selection.map(function(id) {
+                // 	return _this4.state.tabsbyid[id];
+                // });
 
-                  browser.runtime.getBackgroundPage());case 17:backgroundPage = _context5.sent;
-                backgroundPage.createWindowWithTabs(tabs);case 19:
-
-                if (!!window.inPopup) window.close();case 20:case "end":return _context5.stop();}}}, _callee5, this);}));function addWindow() {return _addWindow.apply(this, arguments);}return addWindow;}() }, { key: "pinTabs", value: function () {var _pinTabs = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-
+                // if (count == 1) {
+                // 	await browser.windows.create({});
+                // } else if (count == 2) {
+                // 	var backgroundPage = await browser.runtime.getBackgroundPage();
+                // 	if (navigator.userAgent.search("Firefox") > 0) {
+                // 		backgroundPage.focusOnTabAndWindowDelayed(tabs[1]);
+                // 	}else{
+                // 		backgroundPage.focusOnTabAndWindow(tabs[1]);
+                // 	}
+                // } else {
+                // 	var backgroundPage = await browser.runtime.getBackgroundPage();
+                // 	backgroundPage.createWindowWithTabs(tabs);
+                // }
+                // if (!!window.inPopup) window.close();
+              case 2:case "end":return _context5.stop();}}}, _callee5);}));function addWindow(_x) {return _addWindow.apply(this, arguments);}return addWindow;}() }, { key: "pinTabs", value: function () {var _pinTabs = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
       function _callee6() {var _this5, tabs, i, t;return _regeneratorRuntime().wrap(function _callee6$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:
                 _this5 = this;
                 tabs = this.state.selection.
                 map(function (id) {
                   return _this5.state.tabsbyid[id];
-                }).
-                sort(function (a, b) {
-                  return a.index - b.index;
-                });if (!
-                tabs.length) {_context6.next = 13;break;}
-                if (tabs[1].pinned) tabs.reverse();
-                i = 1;case 5:if (!(i < tabs.length)) {_context6.next = 11;break;}_context6.next = 8;return (
+                });
+                // .sort(function(a, b) {
+                // 	return a.index - b.index;
+                // });
+                if (!tabs.length) {_context6.next = 13;break;}
+                if (tabs[0].pinned) tabs.reverse();
+                i = 0;case 5:if (!(i < tabs.length)) {_context6.next = 11;break;}_context6.next = 8;return (
                   browser.tabs.update(tabs[i].id, { pinned: !tabs[1].pinned }));case 8:i++;_context6.next = 5;break;case 11:_context6.next = 19;break;case 13:_context6.next = 15;return (
 
 
@@ -754,6 +772,10 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
 
 
 
+
+    // highlightDuplicates(e){
+
+    // }
     // highlightDuplicates(e) {
     // 	this.state.selection = [];
     // 	this.state.hiddenTabs = [];
@@ -845,6 +867,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     } }, { key: "checkKey", value:
 
     function checkKey(e) {
+      console.log(e);
       // enter
       if (e.keyCode == 14) this.addWindow();
       // escape key
@@ -1370,45 +1393,57 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     } }, { key: "drag", value:
     function drag(e, id) {
       if (this.state.selection.indexOf(id) == -1) {// if id does not exist
-        this.state.selection.length = 1;
+        // this.state.selection.length = 1;
         // this.state.selection[id] = true;
         this.state.selection.push(id);
         this.state.lastSelect = id;
       }
       this.forceUpdate();
     } }, { key: "drop", value: function () {var _drop = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-      function _callee7(id, before) {var _this6, tab, tabs, index, i, t;return _regeneratorRuntime().wrap(function _callee7$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:
+      function _callee7(id, before) {var _this6, targetTab, targetIndex, targetWindowId;return _regeneratorRuntime().wrap(function _callee7$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:
                 _this6 = this;
-                tab = this.state.tabsbyid[id];
-                tabs = this.state.selection.map(function (id) {
-                  return _this6.state.tabsbyid[id];
+                targetTab = this.state.tabsbyid[id]; // the tab where the user drops their selection onto
+                // var tabs = this.state.selection.map(function(id) {
+                // 	return _this6.state.tabsbyid[id];
+                // });
+                targetIndex = targetTab.index + (before ? 0 : 1); // index from where the dragged elements should be placed
+                targetWindowId = targetTab.windowId;
+
+                browser.tabs.move(this.state.selection, {
+                  windowId: targetWindowId,
+                  index: targetIndex
                 });
-                index = tab.index + (before ? 1 : 1);
+                // for (var i = 1; i < tabs.length; i++) {
+                // 	var t = tabs[i];
+                // 	await browser.tabs.move(t.id, { windowId: tab.windowId, index: index });
+                // 	await browser.tabs.update(t.id, { pinned: t.pinned });
+                // }
+                this.clearSelection();
 
-                i = 1;case 5:if (!(i < tabs.length)) {_context7.next = 14;break;}
-                t = tabs[i];_context7.next = 9;return (
-                  browser.tabs.move(t.id, { windowId: tab.windowId, index: index }));case 9:_context7.next = 11;return (
-                  browser.tabs.update(t.id, { pinned: t.pinned }));case 11:i++;_context7.next = 5;break;case 14:
+                // this.setState({
+                // 	selection: []
+                // });
+                this.update();case 7:case "end":return _context7.stop();}}}, _callee7, this);}));function drop(_x2, _x3) {return _drop.apply(this, arguments);}return drop;}() }, { key: "dropWindow", value: function () {var _dropWindow = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
 
-                this.setState({
-                  selection: {}
-                });
-                this.update();case 16:case "end":return _context7.stop();}}}, _callee7, this);}));function drop(_x, _x2) {return _drop.apply(this, arguments);}return drop;}() }, { key: "dropWindow", value: function () {var _dropWindow = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-
-      function _callee8(windowId) {var _this7, tabs, i, t;return _regeneratorRuntime().wrap(function _callee8$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:
+      function _callee8(targetWindowId) {var _this7, tabs;return _regeneratorRuntime().wrap(function _callee8$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:
                 _this7 = this;
                 tabs = this.state.selection.map(function (id) {
                   return _this7.state.tabsbyid[id];
                 });
-                i = 1;case 3:if (!(i < tabs.length)) {_context8.next = 12;break;}
-                t = tabs[i];_context8.next = 7;return (
-                  browser.tabs.move(t.id, { windowId: windowId, index: 0 }));case 7:_context8.next = 9;return (
-                  browser.tabs.update(t.id, { pinned: t.pinned }));case 9:i++;_context8.next = 3;break;case 12:
-
-                this.setState({
-                  selection: {}
-                });case 13:case "end":return _context8.stop();}}}, _callee8, this);}));function dropWindow(_x3) {return _dropWindow.apply(this, arguments);}return dropWindow;}() }, { key: "changeTabLimit", value:
-
+                browser.tabs.move(this.state.selection, {
+                  windowId: targetWindowId,
+                  index: -1
+                });
+                // for (var i = 1; i < tabs.length; i++) {
+                // 	var t = tabs[i];
+                // 	await browser.tabs.move(t.id, { windowId: windowId, index: 0 });
+                // 	await browser.tabs.update(t.id, { pinned: t.pinned });
+                // }
+                this.clearSelection();
+                // this.setState({
+                // 	selection: {}
+                // });
+              case 4:case "end":return _context8.stop();}}}, _callee8, this);}));function dropWindow(_x4) {return _dropWindow.apply(this, arguments);}return dropWindow;}() }, { key: "changeTabLimit", value:
     function changeTabLimit(e) {
       this.state.tabLimit = e.target.value;
       localStorage["tabLimit"] = JSON.stringify(this.state.tabLimit);
@@ -1598,7 +1633,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         bottomText: "Allows you to export your saved windows to an external backup"
       });
     } }, { key: "importSessions", value:
-    function importSessions(evt) {var _this8 = this;
+    function importSessions(evt) {var _this9 = this;
       if (navigator.userAgent.search("Firefox") > 0) {
         if (window.inPopup) {
           window.alert("Due to a Firefox bug session import does not work in the popup. Please use the options screen or open Tab Manager Plus in its' own tab");
@@ -1624,7 +1659,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
                     } catch (err) {
                       console.error(err);
                       window.alert(err);
-                      _this8.setState({ bottomText: "Error: Could not read the backup file!" });
+                      _this9.setState({ bottomText: "Error: Could not read the backup file!" });
                     }if (!(
                     !!backupFile && backupFile.length > 1)) {_context10.next = 18;break;}
                     success = backupFile.length;
@@ -1642,12 +1677,12 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
 
 
 
-                    _this8.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
+                    _this9.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
 
-                    _this8.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
+                    _this9.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
 
                     inputField.value = "";
-                    _this8.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x4) {return _ref.apply(this, arguments);};}();
+                    _this9.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x5) {return _ref.apply(this, arguments);};}();
 
         reader.readAsText(file);
       } catch (err) {
@@ -1680,7 +1715,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     } }, { key: "toggleFilterMismatchedTabs", value:
     function toggleFilterMismatchedTabs() {
       this.state.filterTabs = !this.state.filterTabs;
-      localStorage["filter-tabs"] = this.state.filterTabs ? "2" : "0";
+      localStorage["filter-tabs"] = this.state.filterTabs ? true : false;
       this.forceUpdate();
     } }, { key: "getTip", value:
     function getTip() {

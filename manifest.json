@@ -15,11 +15,13 @@
 	},
 	"permissions": [
 		"tabs",
+		"activeTab",
 		"contextMenus",
 		"storage",
 		"tabGroups",
 		"windows",
-		"webRequest"
+		"webRequest",
+		"scripting"
 	],
 	"host_permissions":[
 		"*://*/*"
@@ -27,7 +29,10 @@
 	"content_scripts":[
 		{
 			"matches": ["*://*/*"],
-			"js": ["lib/readPage.js"]
+			"js": ["lib/readPage.js", 				
+			"node_modules/@webcomponents/custom-elements/custom-elements.min.js",
+			"lib/medium-highlighter.js",
+			"lib/content.js"]
 		}
 	],
 	"optional_permissions": [

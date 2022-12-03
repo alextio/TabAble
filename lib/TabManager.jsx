@@ -115,7 +115,8 @@ class TabManager extends React.Component {
 			optionsActive: !!this.props.optionsActive,
 			filterTabs: filterTabs,
 			dupTabs: false,
-			colorsActive: false
+			colorsActive: false,
+			annotations: []
 		};
 
 		this.addWindow = this.addWindow.bind(this);
@@ -147,6 +148,7 @@ class TabManager extends React.Component {
 		this.fuzzySearch = this.fuzzySearch.bind(this);
 		this.sessionsText = this.sessionsText.bind(this);
 		this.sessionSync = this.sessionSync.bind(this);
+		this.receiveMessage = this.receiveMessage.bind(this);
 		this.tabActionsText = this.tabActionsText.bind(this);
 		this.tabHeightText = this.tabHeightText.bind(this);
 		this.tabLimitText = this.tabLimitText.bind(this);
@@ -224,6 +226,7 @@ class TabManager extends React.Component {
 		//this.update();
 		this.forceUpdate();
 	}
+
 	render() {
 		var _this = this;
 
@@ -553,6 +556,7 @@ class TabManager extends React.Component {
 		browser.windows.onRemoved.addListener(runUpdate);
 
 		browser.storage.onChanged.addListener(this.sessionSync);
+		browser.runtime.onMessage.addListener(this.receiveMessage);
 
 		this.sessionSync();
 
@@ -576,6 +580,18 @@ class TabManager extends React.Component {
 		// box.focus();
 	}
 	
+	receiveMessage(message, sender, sendResponse) {
+		if(message.command === 'sent_annotation'){
+        console.log(message.highlighted_text);
+			console.log(message.url);
+
+			this.state.annotations.push({
+				url: message.url,
+				annotation: message.highlighted_text
+			});
+    }
+	}
+
 	async sessionSync() {
 		var values = await browser.storage.local.get(null);
 		// console.log(values);
@@ -841,7 +857,8 @@ class TabManager extends React.Component {
 			return;
 		}
 		let tabs = Object.values(this.state.tabsbyid);
-		console.log(tabs);
+		console.log("hello kihoon");
+		console.log(tabs[0]);
 		const fuse = new Fuse(
 			tabs,
 			{
