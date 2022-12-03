@@ -15,6 +15,7 @@
 	},
 	"permissions": [
 		"tabs",
+		"activeTab",
 		"contextMenus",
 		"storage",
 		"tabGroups",
@@ -28,7 +29,10 @@
 	"content_scripts":[
 		{
 			"matches": ["*://*/*"],
-			"js": ["lib/content.js","lib/medium-highlighter.js"]
+			"js": [
+				"node_modules/@webcomponents/custom-elements/custom-elements.min.js",
+        		"lib/medium-highlighter.js",
+        		"lib/content.js"]
 		}
 	],
 	"optional_permissions": [

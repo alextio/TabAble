@@ -207,8 +207,8 @@ function tabUpdated(tabId, changeInfo, tabInfo){
 function setupAnnotation(tabId) {
 			browser.scripting.executeScript({ // this works. Don't touch.
 			target: { tabId: tabId },
-			files: ['lib/content.js', 'lib/medium-highlighter.js'] 
-		})
+			files: ['lib/content.js'] 
+			})
 }
 
 function readPage(tabId){
@@ -216,7 +216,6 @@ function readPage(tabId){
 			target: { tabId: tabId },
 			files: ['lib/readPage.js'] 
 		})
-
 }
 
 function logRequest(details){
@@ -521,6 +520,14 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		let payload = request.result;
 		console.log(payload);
 	}
+	else if (request.from === "content") {
+		// sent the data (hilighted text and url) to the lib/annotation.jsx
+		chrome.runtime.sendMessage( {
+			command: 'sent_annotation',
+			highlighted_text: request.result,
+			url: request.url,
+		});
+	}
 	else if (request.command === "update_settings"){
 		let settings = request.params
 		if (settings.name === "openInOwnTab"){ setupPopup(settings.value); }
@@ -624,7 +631,6 @@ async function openExtension(){
 	await browser.action.setPopup({popup: popupStr});
 	await browser.action.openPopup();
 }
-
 
 // setInterval(setupListeners, 300000);
 // setupListeners();

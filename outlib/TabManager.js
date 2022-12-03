@@ -148,6 +148,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     _this2.fuzzySearch = _this2.fuzzySearch.bind(_assertThisInitialized(_this2));
     _this2.sessionsText = _this2.sessionsText.bind(_assertThisInitialized(_this2));
     _this2.sessionSync = _this2.sessionSync.bind(_assertThisInitialized(_this2));
+    _this2.receiveMessage = _this2.receiveMessage.bind(_assertThisInitialized(_this2));
     _this2.tabActionsText = _this2.tabActionsText.bind(_assertThisInitialized(_this2));
     _this2.tabHeightText = _this2.tabHeightText.bind(_assertThisInitialized(_this2));
     _this2.tabLimitText = _this2.tabLimitText.bind(_assertThisInitialized(_this2));
@@ -206,6 +207,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       //this.update();
       this.forceUpdate();
     } }, { key: "render", value:
+
     function render() {
       var _this = this;
 
@@ -516,6 +518,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         React.createElement("div", { className: "window placeholder" })));
 
 
+
     } }, { key: "componentDidMount", value:
     function componentDidMount() {
 
@@ -535,6 +538,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       browser.windows.onRemoved.addListener(runUpdate);
 
       browser.storage.onChanged.addListener(this.sessionSync);
+      browser.runtime.onMessage.addListener(this.receiveMessage);
 
       this.sessionSync();
 
@@ -556,6 +560,13 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
 
       // box.select();
       // box.focus();
+    } }, { key: "receiveMessage", value:
+
+    function receiveMessage(message, sender, sendResponse) {
+      if (message.command === 'sent_annotation') {
+        console.log(message.highlighted_text);
+        console.log(message.url);
+      }
     } }, { key: "sessionSync", value: function () {var _sessionSync = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
 
       function _callee() {var values, sessions, key, sess;return _regeneratorRuntime().wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.next = 2;return (

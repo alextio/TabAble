@@ -148,6 +148,7 @@ class TabManager extends React.Component {
 		this.fuzzySearch = this.fuzzySearch.bind(this);
 		this.sessionsText = this.sessionsText.bind(this);
 		this.sessionSync = this.sessionSync.bind(this);
+		this.receiveMessage = this.receiveMessage.bind(this);
 		this.tabActionsText = this.tabActionsText.bind(this);
 		this.tabHeightText = this.tabHeightText.bind(this);
 		this.tabLimitText = this.tabLimitText.bind(this);
@@ -206,6 +207,7 @@ class TabManager extends React.Component {
 		//this.update();
 		this.forceUpdate();
 	}
+
 	render() {
 		var _this = this;
 
@@ -514,6 +516,7 @@ class TabManager extends React.Component {
 					</table>
 				</div>
 				<div className="window placeholder" />
+
 			</div>
 		);
 	}
@@ -535,6 +538,7 @@ class TabManager extends React.Component {
 		browser.windows.onRemoved.addListener(runUpdate);
 
 		browser.storage.onChanged.addListener(this.sessionSync);
+		browser.runtime.onMessage.addListener(this.receiveMessage)
 
 		this.sessionSync();
 
@@ -556,6 +560,13 @@ class TabManager extends React.Component {
 
 		// box.select();
 		// box.focus();
+	}
+
+ 	receiveMessage(message, sender, sendResponse) {
+		if(message.command === 'sent_annotation'){
+        console.log(message.highlighted_text);
+        console.log(message.url);
+    }
 	}
 	
 	async sessionSync() {
