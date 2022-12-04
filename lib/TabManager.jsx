@@ -116,7 +116,8 @@ class TabManager extends React.Component {
 			filterTabs: filterTabs,
 			dupTabs: false,
 			colorsActive: false,
-			annotations: []
+			annotations: [],
+			annotatedTabs: {},
 		};
 
 		this.addWindow = this.addWindow.bind(this);
@@ -274,6 +275,7 @@ class TabManager extends React.Component {
 								key={"window" + window.id}
 								window={window}
 								tabs={window.tabs}
+								// tabs={this.state.annotatedTabs.map()}
 								incognito={window.incognito}
 								layout={_this.state.layout}
 								selection={_this.state.selection}
@@ -684,6 +686,15 @@ class TabManager extends React.Component {
 		this.state.tabCount = tabCount;
 		this.setState({
 			tabCount: tabCount
+		});
+
+		let annotatedTabObjects = tabs.map(((tab) => {
+			let annotationExists = this.state.annotations.find(annotation => annotation.url === tab.url);
+			annotationExists ? tab.annotation = this.state.annotations.find(annotation => annotation.url === tab.url).payload : tab.annotation = "";
+			return tab;
+		}));
+		this.setState({
+			annotatedTabs: annotatedTabObjects
 		});
 	
 	}

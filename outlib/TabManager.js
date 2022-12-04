@@ -116,7 +116,8 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       filterTabs: filterTabs,
       dupTabs: false,
       colorsActive: false,
-      annotations: []
+      annotations: [],
+      annotatedTabs: {}
     };
 
     _this2.addWindow = _this2.addWindow.bind(_assertThisInitialized(_this2));
@@ -273,8 +274,9 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
             React.createElement(Window, {
               key: "window" + window.id,
               window: window,
-              tabs: window.tabs,
-              incognito: window.incognito,
+              tabs: window.tabs
+              // tabs={this.state.annotatedTabs.map()}
+              , incognito: window.incognito,
               layout: _this.state.layout,
               selection: _this.state.selection,
               searchActive: _this.state.searchLen > 1,
@@ -645,7 +647,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       console.log("colorsActive", active, windowId, this.state.colorsActive);
       this.forceUpdate();
     } }, { key: "update", value: function () {var _update = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-      function _callee2() {var windows, tabCount, i, window, j, tab, id;return _regeneratorRuntime().wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_context2.next = 2;return (
+      function _callee2() {var _this8 = this;var windows, tabCount, i, window, j, tab, id, annotatedTabObjects;return _regeneratorRuntime().wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_context2.next = 2;return (
                   browser.windows.getAll({ populate: true }));case 2:windows = _context2.sent;
                 windows.sort(function (a, b) {
                   var windows = [];
@@ -684,7 +686,16 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
                 this.state.tabCount = tabCount;
                 this.setState({
                   tabCount: tabCount
-                });case 13:case "end":return _context2.stop();}}}, _callee2, this);}));function update() {return _update.apply(this, arguments);}return update;}() }, { key: "deleteTabs", value: function () {var _deleteTabs = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
+                });
+
+                annotatedTabObjects = tabs.map(function (tab) {
+                  var annotationExists = _this8.state.annotations.find(function (annotation) {return annotation.url === tab.url;});
+                  annotationExists ? tab.annotation = _this8.state.annotations.find(function (annotation) {return annotation.url === tab.url;}).payload : tab.annotation = "";
+                  return tab;
+                });
+                this.setState({
+                  annotatedTabs: annotatedTabObjects
+                });case 15:case "end":return _context2.stop();}}}, _callee2, this);}));function update() {return _update.apply(this, arguments);}return update;}() }, { key: "deleteTabs", value: function () {var _deleteTabs = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
 
 
       function _callee3() {var _this3, tabs, i, t;return _regeneratorRuntime().wrap(function _callee3$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:
@@ -726,7 +737,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     function discardTab(tabId) {
       browser.tabs.discard(tabId);
     } }, { key: "addWindow", value: function () {var _addWindow = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
-      function _callee5(tabIds) {var _this8 = this;var count;return _regeneratorRuntime().wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:
+      function _callee5(tabIds) {var _this9 = this;var count;return _regeneratorRuntime().wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:
                 count = tabIds.length;
                 browser.windows.create(
                 {
@@ -742,7 +753,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
                   }).then(function (tabs) {
                     console.log('moved tabs:' + tabs);
                   });
-                  _this8.clearSelection();
+                  _this9.clearSelection();
                 });
                 // var _this4 = this;
                 // var count = this.state.selection.length;
@@ -847,7 +858,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     // 	this.forceUpdate();
     // }
   }, { key: "fuzzySearch", value:
-    function fuzzySearch(e) {var _this9 = this;
+    function fuzzySearch(e) {var _this10 = this;
       var searchQuery = e.target.value || "";
       this.state.searchLen = searchQuery.length;
       if (this.state.searchLen === 0) {
@@ -857,8 +868,8 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
       }
       var tabs = Object.values(this.state.tabsbyid);
       var annotatedTabs = tabs.map(function (tab) {
-        var annotationExists = _this9.state.annotations.find(function (annotation) {return annotation.url === tab.url;});
-        annotationExists ? tab.annotation = _this9.state.annotations.find(function (annotation) {return annotation.url === tab.url;}).payload : tab.annotation = "";
+        var annotationExists = _this10.state.annotations.find(function (annotation) {return annotation.url === tab.url;});
+        annotationExists ? tab.annotation = _this10.state.annotations.find(function (annotation) {return annotation.url === tab.url;}).payload : tab.annotation = "";
         return tab;
       });
       console.log(tabs[0]);
@@ -1654,7 +1665,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         bottomText: "Allows you to export your saved windows to an external backup"
       });
     } }, { key: "importSessions", value:
-    function importSessions(evt) {var _this10 = this;
+    function importSessions(evt) {var _this11 = this;
       if (navigator.userAgent.search("Firefox") > 0) {
         if (window.inPopup) {
           window.alert("Due to a Firefox bug session import does not work in the popup. Please use the options screen or open Tab Manager Plus in its' own tab");
@@ -1680,7 +1691,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
                     } catch (err) {
                       console.error(err);
                       window.alert(err);
-                      _this10.setState({ bottomText: "Error: Could not read the backup file!" });
+                      _this11.setState({ bottomText: "Error: Could not read the backup file!" });
                     }if (!(
                     !!backupFile && backupFile.length > 1)) {_context10.next = 18;break;}
                     success = backupFile.length;
@@ -1698,12 +1709,12 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
 
 
 
-                    _this10.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
+                    _this11.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
 
-                    _this10.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
+                    _this11.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
 
                     inputField.value = "";
-                    _this10.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x5) {return _ref.apply(this, arguments);};}();
+                    _this11.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x5) {return _ref.apply(this, arguments);};}();
 
         reader.readAsText(file);
       } catch (err) {

@@ -89,6 +89,7 @@ class Window extends React.Component {
 					dropWindow={_this.props.dropWindow}
 					ref={"tab" + tab.id}
 					id={"tab-" + tab.id}
+					// annotations={}
 				/>
 			);
 		});

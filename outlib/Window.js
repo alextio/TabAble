@@ -88,8 +88,9 @@ Window = /*#__PURE__*/function (_React$Component) {_inherits(Window, _React$Comp
             drop: _this.props.drop,
             dropWindow: _this.props.dropWindow,
             ref: "tab" + tab.id,
-            id: "tab-" + tab.id }));
-
+            id: "tab-" + tab.id
+            // annotations={}
+          }));
 
       });
       if (!hideWindow) {
