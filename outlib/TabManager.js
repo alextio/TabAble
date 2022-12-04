@@ -586,7 +586,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         console.log(message.url);
         this.state.annotations.push({
           url: message.url,
-          annotation: message.highlighted_text
+          payload: message.highlighted_text
         });
       }
     } }, { key: "sessionSync", value: function () {var _sessionSync = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(
@@ -847,7 +847,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
     // 	this.forceUpdate();
     // }
   }, { key: "fuzzySearch", value:
-    function fuzzySearch(e) {
+    function fuzzySearch(e) {var _this9 = this;
       var searchQuery = e.target.value || "";
       this.state.searchLen = searchQuery.length;
       if (this.state.searchLen === 0) {
@@ -856,14 +856,19 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         return;
       }
       var tabs = Object.values(this.state.tabsbyid);
-      console.log("hello kihoon");
+      var annotatedTabs = tabs.map(function (tab) {
+        var annotationExists = _this9.state.annotations.find(function (annotation) {return annotation.url === tab.url;});
+        annotationExists ? tab.annotation = _this9.state.annotations.find(function (annotation) {return annotation.url === tab.url;}).payload : tab.annotation = "";
+        return tab;
+      });
       console.log(tabs[0]);
       var fuse = new Fuse(
-      tabs,
+      annotatedTabs,
       {
         keys: [
         { name: 'title', weight: 0.6 },
-        { name: 'url', weight: 0.4 }],
+        { name: 'annotation', weight: 0.3 },
+        { name: 'url', weight: 0.1 }],
 
         includeScore: true,
         includesMatches: true,
@@ -1649,7 +1654,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
         bottomText: "Allows you to export your saved windows to an external backup"
       });
     } }, { key: "importSessions", value:
-    function importSessions(evt) {var _this9 = this;
+    function importSessions(evt) {var _this10 = this;
       if (navigator.userAgent.search("Firefox") > 0) {
         if (window.inPopup) {
           window.alert("Due to a Firefox bug session import does not work in the popup. Please use the options screen or open Tab Manager Plus in its' own tab");
@@ -1675,7 +1680,7 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
                     } catch (err) {
                       console.error(err);
                       window.alert(err);
-                      _this9.setState({ bottomText: "Error: Could not read the backup file!" });
+                      _this10.setState({ bottomText: "Error: Could not read the backup file!" });
                     }if (!(
                     !!backupFile && backupFile.length > 1)) {_context10.next = 18;break;}
                     success = backupFile.length;
@@ -1693,12 +1698,12 @@ TabManager = /*#__PURE__*/function (_React$Component) {_inherits(TabManager, _Re
 
 
 
-                    _this9.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
+                    _this10.setState({ bottomText: success + " windows successfully restored!" });_context10.next = 19;break;case 18:
 
-                    _this9.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
+                    _this10.setState({ bottomText: "Error: Could not restore any windows from the backup file!" });case 19:
 
                     inputField.value = "";
-                    _this9.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x5) {return _ref.apply(this, arguments);};}();
+                    _this10.sessionSync();case 21:case "end":return _context10.stop();}}}, _callee10);}));return function (_x5) {return _ref.apply(this, arguments);};}();
 
         reader.readAsText(file);
       } catch (err) {

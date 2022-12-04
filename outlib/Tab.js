@@ -7,7 +7,7 @@
       name: "",
       lastAccessed: "12/4 11:00",
       keywords: ["1", "2", "3"],
-      annotations: ["asdf"]
+      annotations: []
     };
 
     _this.onHover = _this.onHover.bind(_assertThisInitialized(_this));
@@ -17,13 +17,28 @@
     _this.dragOver = _this.dragOver.bind(_assertThisInitialized(_this));
     _this.dragOut = _this.dragOut.bind(_assertThisInitialized(_this));
     _this.drop = _this.drop.bind(_assertThisInitialized(_this));
-    _this.resolveFavIconUrl = _this.resolveFavIconUrl.bind(_assertThisInitialized(_this));return _this;
+    _this.resolveFavIconUrl = _this.resolveFavIconUrl.bind(_assertThisInitialized(_this));
 
+    // this.receiveMessage = this.receiveMessage.bind(this);
+    return _this;
   }_createClass(Tab, [{ key: "componentWillMount", value:
     function componentWillMount() {
       this.resolveFavIconUrl();
-    } }, { key: "render", value:
-    function render() {
+    } }, { key: "componentDidMount", value:
+    function componentDidMount() {
+      browser.runtime.onMessage.addListener(this.receiveMessage);
+    }
+    // receiveMessage(message, sender, sendResponse) {
+    // 	if(message.command === 'sent_annotation' && message.url === this.props.tab.url){
+    //     	console.log(message.highlighted_text);
+    // 		console.log(message.url);
+    // 		this.state.annotations.push({
+    // 			url: message.url,
+    // 			annotation: message.highlighted_text
+    // 		});
+    // }
+    // }
+  }, { key: "render", value: function render() {
       var children = [];
       if (this.props.layout == "vertical") {
         children.push( /*#__PURE__*/

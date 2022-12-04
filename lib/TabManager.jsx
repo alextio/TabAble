@@ -586,7 +586,7 @@ class TabManager extends React.Component {
 			console.log(message.url);
 			this.state.annotations.push({
 				url: message.url,
-				annotation: message.highlighted_text
+				payload: message.highlighted_text
 			});
     }
 	}
@@ -856,14 +856,19 @@ class TabManager extends React.Component {
 			return;
 		}
 		let tabs = Object.values(this.state.tabsbyid);
-		console.log("hello kihoon");
+		let annotatedTabs = tabs.map(((tab) => {
+			let annotationExists = this.state.annotations.find(annotation => annotation.url === tab.url);
+			annotationExists ? tab.annotation = this.state.annotations.find(annotation => annotation.url === tab.url).payload : tab.annotation = "";
+			return tab;
+		}));
 		console.log(tabs[0]);
 		const fuse = new Fuse(
-			tabs,
+			annotatedTabs,
 			{
 				keys: [
-					{name: 'title', weight: 0.6}, 
-					{name: 'url', weight: 0.4} 
+					{ name: 'title', weight: 0.6 },
+					{ name: 'annotation', weight: 0.3},
+					{name: 'url', weight: 0.1} 
 				],
 			includeScore: true ,
 			includesMatches: true,

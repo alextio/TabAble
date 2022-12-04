@@ -7,7 +7,7 @@ class Tab extends React.Component {
 			name: "",
 			lastAccessed: "12/4 11:00",
 			keywords: ["1", "2", "3"],
-			annotations: ["asdf"]
+			annotations: []
 		};
 
 		this.onHover = this.onHover.bind(this);
@@ -19,10 +19,25 @@ class Tab extends React.Component {
 		this.drop = this.drop.bind(this);
 		this.resolveFavIconUrl = this.resolveFavIconUrl.bind(this);
 
+		// this.receiveMessage = this.receiveMessage.bind(this);
+
 	}
 	componentWillMount() {
 		this.resolveFavIconUrl();
 	}
+	componentDidMount() {
+		browser.runtime.onMessage.addListener(this.receiveMessage);
+	}
+	// receiveMessage(message, sender, sendResponse) {
+	// 	if(message.command === 'sent_annotation' && message.url === this.props.tab.url){
+    //     	console.log(message.highlighted_text);
+	// 		console.log(message.url);
+	// 		this.state.annotations.push({
+	// 			url: message.url,
+	// 			annotation: message.highlighted_text
+	// 		});
+    // }
+	// }
 	render() {
 		var children = [];
 		if (this.props.layout == "vertical") {
