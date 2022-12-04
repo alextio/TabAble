@@ -582,9 +582,8 @@ class TabManager extends React.Component {
 	
 	receiveMessage(message, sender, sendResponse) {
 		if(message.command === 'sent_annotation'){
-        console.log(message.highlighted_text);
+        	console.log(message.highlighted_text);
 			console.log(message.url);
-
 			this.state.annotations.push({
 				url: message.url,
 				annotation: message.highlighted_text

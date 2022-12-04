@@ -6,7 +6,8 @@ class Tab extends React.Component {
 			favIcon: "",
 			name: "",
 			lastAccessed: "12/4 11:00",
-			keywords: ["1", "2", "3"]
+			keywords: ["1", "2", "3"],
+			annotations: ["asdf"]
 		};
 
 		this.onHover = this.onHover.bind(this);
@@ -60,7 +61,10 @@ class Tab extends React.Component {
 		if (this.props.layout == "tabable") {
 			children.push(
 				<div class="holder">
-					<img src={this.props.tab.favIconUrl} className="iconimage"></img>
+					<div class="row">
+						<div class="column"><img src={this.props.tab.favIconUrl} className="iconimage"></img></div>
+						{this.state.annotations.length > 0 && <div class="column"><img src="../images/annotation_marker.svg" width="30" className="annotation_marker"></img></div>}
+					</div>
 					<div className="name">{this.props.tab.title}</div>
 					<div className="lastAccessed">Accessed: {this.state.lastAccessed}</div>
 					<div className="keywords">Keywords: {this.state.keywords.join(', ')}</div>
@@ -96,6 +100,7 @@ class Tab extends React.Component {
 			title: this.props.tab.title,
 			lastAccessed: this.state.lastAccessed,
 			keywords: this.state.keywords,
+			annotations: this.state.annotations,
 			onClick: this.click,
 			onMouseDown: this.onMouseDown,
 			onMouseEnter: this.onHover

@@ -522,10 +522,11 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 	else if (request.from === "content") {
 		// sent the data (hilighted text and url) to the lib/annotation.jsx
-		chrome.runtime.sendMessage( {
+		console.log(sender);
+		chrome.runtime.sendMessage({
 			command: 'sent_annotation',
 			highlighted_text: request.result,
-			url: request.url,
+			url: sender.url,
 		});
 	}
 	else if (request.command === "update_settings"){

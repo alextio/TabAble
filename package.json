@@ -33,9 +33,9 @@
     "babel-preset-react-app": "^3.1.2"
   },
   "dependencies": {
+    "@webcomponents/custom-elements": "^1.5.1",
     "javascript-time-ago": "^2.5.9",
     "moment": "^2.29.4",
-    "react-time-ago": "^7.2.1",
-    "@webcomponents/custom-elements": "^1.5.1"
+    "react-time-ago": "^7.2.1"
   }
 }
