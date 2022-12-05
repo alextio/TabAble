@@ -209,6 +209,7 @@ h1,h2,h3,h4,h5,h6 {
 .window.tabable .tab {
 	border-radius: 5px;
 	height: fit-content;
+	min-width: 20rem;
 	width: 15%;
 	background-image: none;
 	overflow: hidden;
