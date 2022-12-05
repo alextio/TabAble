@@ -7,7 +7,7 @@ class Tab extends React.Component {
 			name: "",
 			lastAccessed: "12/4 11:00",
 			keywords: ["1", "2", "3"],
-			annotations: []
+			annotations: "",
 		};
 
 		this.onHover = this.onHover.bind(this);
@@ -82,7 +82,7 @@ class Tab extends React.Component {
 					</div>
 					<div className="name">{this.props.tab.title}</div>
 					<div className="lastAccessed">Accessed: {this.state.lastAccessed}</div>
-					<div className="keywords">Keywords: {this.state.keywords.join(', ')}</div>
+					<div className="keywords">Keywords: {this.props.annotations}</div>
 				</div>
 			);
 		}

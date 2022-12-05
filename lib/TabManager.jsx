@@ -298,6 +298,7 @@ class TabManager extends React.Component {
 								windowTitles={_this.state.windowTitles}
 								lastOpenWindow={_this.state.lastOpenWindow}
 								ref={"window" + window.id}
+								annotations={_this.state.annotations}
 							/>
 						);
 					}.bind(this))}
@@ -590,6 +591,7 @@ class TabManager extends React.Component {
 				url: message.url,
 				payload: message.highlighted_text
 			});
+			this.update();
     }
 	}
 
@@ -688,9 +690,10 @@ class TabManager extends React.Component {
 			tabCount: tabCount
 		});
 
+		let tabs = Object.values(this.state.tabsbyid);
 		let annotatedTabObjects = tabs.map(((tab) => {
 			let annotationExists = this.state.annotations.find(annotation => annotation.url === tab.url);
-			annotationExists ? tab.annotation = this.state.annotations.find(annotation => annotation.url === tab.url).payload : tab.annotation = "";
+			annotationExists ? tab.annotation = this.state.annotations.filter(annotation => annotation.url === tab.url).map(each => { return each.payload }).join(" ") : tab.annotation = "";
 			return tab;
 		}));
 		this.setState({
@@ -869,7 +872,7 @@ class TabManager extends React.Component {
 		let tabs = Object.values(this.state.tabsbyid);
 		let annotatedTabs = tabs.map(((tab) => {
 			let annotationExists = this.state.annotations.find(annotation => annotation.url === tab.url);
-			annotationExists ? tab.annotation = this.state.annotations.find(annotation => annotation.url === tab.url).payload : tab.annotation = "";
+			annotationExists ? tab.annotation = this.state.annotations.filter(annotation => annotation.url === tab.url).map(each => { return each.payload }).join(" ") : tab.annotation = "";
 			return tab;
 		}));
 		console.log(tabs[0]);
