@@ -7,7 +7,7 @@
       name: "",
       lastAccessed: "12/4 11:00",
       keywords: ["1", "2", "3"],
-      annotations: ""
+      annotations: []
     };
 
     _this.onHover = _this.onHover.bind(_assertThisInitialized(_this));
@@ -82,7 +82,12 @@
 
         React.createElement("div", { className: "name" }, this.props.tab.title), /*#__PURE__*/
         React.createElement("div", { className: "lastAccessed" }, "Accessed: ", this.state.lastAccessed), /*#__PURE__*/
-        React.createElement("div", { className: "keywords" }, "Keywords: ", this.props.annotations)));
+        React.createElement("div", { className: "keywords" }, " Keywords:\xA0\xA0",
+        this.props.annotations.map(function (annotation) {
+          return /*#__PURE__*/React.createElement("div", { className: "keyword" }, annotation);
+        }))));
+
+
 
 
       }

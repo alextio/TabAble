@@ -208,14 +208,16 @@ h1,h2,h3,h4,h5,h6 {
 }
 .window.tabable .tab {
 	border-radius: 5px;
-	height: 10rem;
+	height: fit-content;
 	width: 15%;
 	background-image: none;
+	overflow: hidden;
 	/* background-size:1.5rem 1.5rem; */
 }
 .animations .window.tabable .tab:hover {
 	transform: scale(1.1);
 	filter: none; 
+	overflow: visible;
 }
 .animations .window.tabable .tab.search-active{
 	transform: scale(0.9);
@@ -231,8 +233,8 @@ h1,h2,h3,h4,h5,h6 {
 }
 .holder {
 	padding: 5%;
-	width: 100%;
-	height: 20rem;
+	width: 90%;
+	height: 11rem;
 }
 .name {
 	height: 3rem;
@@ -241,6 +243,34 @@ h1,h2,h3,h4,h5,h6 {
 	overflow: hidden;
 	overflow-wrap: break-word; 
 	font-weight: bold;
+}
+.lastAccessed {
+	height: fit-content;
+	width: 90%;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	overflow-wrap: break-word; 
+	font-weight: bold;
+	color: grey;
+	font-style: italic;
+}
+.keywords {
+	height: fit-content;
+	text-overflow: ellipsis;
+	overflow-wrap: break-word; 
+	font-weight: bold;
+	color: blue;
+}
+.keyword {
+	height: fit-content;
+	width: fit-content;
+	background-color: skyblue;
+	border-radius: 10px;
+	padding-left: 5%;
+	padding-right: 5%;
+	margin-right: 2%;
+	margin-top: 3%;
+	display: inline-block;
 }
 
 .window.searchbox .icon{
@@ -541,6 +571,9 @@ h1,h2,h3,h4,h5,h6 {
 }
 .vertical-view{
 	background-image:url(../images/views/vertical.png);
+}
+.tabable-view{
+	background-image:url(../images/views/tabable.png);
 }
 .pin{
 	background-image:url(../images/push-pin64.png);

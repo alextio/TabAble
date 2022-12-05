@@ -89,7 +89,7 @@ Window = /*#__PURE__*/function (_React$Component) {_inherits(Window, _React$Comp
             dropWindow: _this.props.dropWindow,
             ref: "tab" + tab.id,
             id: "tab-" + tab.id,
-            annotations: _this.props.annotations.filter(function (annotation) {return annotation.url === tab.url;}).map(function (each) {return each.payload;}).join(" ") }));
+            annotations: _this.props.annotations.filter(function (annotation) {return annotation.url === tab.url;}).map(function (each) {return each.payload;}) }));
 
 
       });
