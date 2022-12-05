@@ -1,6 +1,6 @@
 "use strict";
 // importScripts('lib/analytics.js');
-// importScripts('vendor/localforage.min.js');
+importScripts('vendor/localforage.min.js');
 
 // TODO: Migrate background.js to service worker and upgrade to Manifest V3. 
 // When migrating to this new background context, you'll need to keep two main things in mind. 
@@ -14,13 +14,15 @@
 // https://developer.chrome.com/docs/extensions/mv3/migrating_to_service_workers/
 
 var browser = browser || chrome;
+var tabIntxDB;
+var annotIntxDB;
 // windows.tabsActive = []; // DOM is not available to service workers
 // windows.displayInfo = [];
 
 function setup(){
 	console.log(self);
 	setupListeners(); 
-	// setupStorage();
+	setupStorage();
 	// setupPopup(getItem('settings', 'openInOwnTab'));
 	updateTabCountDebounce();
 	// setTimeout(cleanUp, 5000);
@@ -28,7 +30,28 @@ function setup(){
 }
 
 function setupStorage(){
+tabIntxDB = localforage.createInstance({
+	driver: localforage.INDEXEDDB,
+	name: "logs",
+	storeName: "user_tab_interaction_logs"
+});
 
+annotIntxDB = localforage.createInstance({
+	driver: localforage.INDEXEDDB,
+	name: "logs",
+	storeName: "annotation_logs"
+});
+}
+
+async function logInteraction(db, interaction, id){
+	let timestamp = new Date().toString();
+	localforage.setItem(timestamp,{
+		interaction: interaction,
+		id: id
+	}).then((val) => console.log("successfully saved " + val))
+	.catch((err) => console.log(err));
+	let result = await localforage.getItem(timestamp);
+	console.log(result);
 }
 
 function setupListeners(){
@@ -56,7 +79,7 @@ function setupListeners(){
 	browser.windows.onCreated.addListener(windowCreated);
 	browser.windows.onRemoved.addListener(windowRemoved);
 
-	browser.webRequest.onCompleted.addListener(logRequest,{urls: ["*://*/*"]});
+	// browser.webRequest.onCompleted.addListener(logRequest,{urls: ["*://*/*"]});
 	
 	// browser.action.onClicked.addListener(openExtension); // will not fire if the action key in manifest is set to 'popup'
 }
@@ -172,7 +195,8 @@ async function updateTabCount() {
 
 var updateTabCountDebounce = debounce(updateTabCount, 250);
 
-function tabRemoved() {
+function tabRemoved(tab) {
+	logInteraction(tabIntxDB, "Closed tab", tab.id);
 	updateTabCountDebounce();
 }
 
@@ -182,6 +206,7 @@ async function tabAdded(tab) {
 	// } catch (e) {
 	// 	var tabLimit = 0;
 	// }
+	logInteraction(tabIntxDB, "Added tab", tab.id);
 	const tabLimit = 0;
 	if (tabLimit > 0) {
 		if (tab.id != browser.tabs.TAB_ID_NONE) {
@@ -197,6 +222,7 @@ async function tabAdded(tab) {
 function tabUpdated(tabId, changeInfo, tabInfo){
 	let url = changeInfo.url
 	if (url && !url.startsWith('chrome://')) {
+		logInteraction(tabIntxDB, `Updated tab to ${url}`, tabId);
 		const date = Date.now();
 		console.log(`Tab: ${tabId} URL changed to ${url} at ${date}`);
 		// readPage(tabId);
@@ -228,25 +254,26 @@ function logRequest(details){
 }
 
 function tabActiveChanged(tab) {
-	if (!!tab && !!tab.tabId) {
-		if (!windows.tabsActive) windows.tabsActive = [];
-		if (!!windows.tabsActive && windows.tabsActive.length > 0) {
-			var lastActive = windows.tabsActive[windows.tabsActive.length - 1];
-			if (!!lastActive && lastActive.tabId == tab.tabId && lastActive.windowId == tab.windowId) {
-				return;
-			}
-		}
-		while (windows.tabsActive.length > 20) {
-			windows.tabsActive.shift();
-		}
-		for (var i = windows.tabsActive.length - 1; i >= 0; i--) {
-			if (windows.tabsActive[i].tabId == tab.tabId) {
-				windows.tabsActive.splice(i, 1);
-			}
-		};
-		windows.tabsActive.push(tab);
-	}
+	// if (!!tab && !!tab.tabId) {
+	// 	if (!windows.tabsActive) windows.tabsActive = [];
+	// 	if (!!windows.tabsActive && windows.tabsActive.length > 0) {
+	// 		var lastActive = windows.tabsActive[windows.tabsActive.length - 1];
+	// 		if (!!lastActive && lastActive.tabId == tab.tabId && lastActive.windowId == tab.windowId) {
+	// 			return;
+	// 		}
+	// 	}
+	// 	while (windows.tabsActive.length > 20) {
+	// 		windows.tabsActive.shift();
+	// 	}
+	// 	for (var i = windows.tabsActive.length - 1; i >= 0; i--) {
+	// 		if (windows.tabsActive[i].tabId == tab.tabId) {
+	// 			windows.tabsActive.splice(i, 1);
+	// 		}
+	// 	};
+	// 	windows.tabsActive.push(tab);
+	// }
 	updateTabCountDebounce();
+	logInteraction(tabIntxDB, "Tab activated", tab.id);
 }
 
 // async function openSidebar() {
@@ -355,6 +382,7 @@ function storageAvailable() {
 }
 
 function windowFocus(windowId) {
+	logInteraction(tabIntxDB, "Window focused", windowId);
 	try {
 		if (!!windowId) {
 			windowActive(windowId);
@@ -366,9 +394,10 @@ function windowFocus(windowId) {
 	}
 }
 function windowCreated(window) {
+	logInteraction(tabIntxDB, "Window Created", window.id);
 	try {
-		if (!!window && !!windows.id) {
-			windowActive(windows.id);
+		if (!!window && !!window.id) {
+			windowActive(window.id);
 		}
 	} catch (e) {
 
@@ -376,6 +405,7 @@ function windowCreated(window) {
 	// console.log("onCreated", windows.id);
 }
 function windowRemoved(windowId) {
+	logInteraction(tabIntxDB, "Window Focused", windowId);
 	try {
 		if (!!windowId) {
 			windowActive(windowId);
@@ -522,6 +552,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 	else if (request.from === "content") {
 		// sent the data (hilighted text and url) to the lib/annotation.jsx
+		logInteraction(annotIntxDB, `Highlighted text: ${request.result}`, sender);
 		console.log(sender);
 		chrome.runtime.sendMessage({
 			command: 'sent_annotation',
